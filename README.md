@@ -17,15 +17,15 @@
 While developing services with scalability, throughput, and performance as major concerns, 
 some common problems in parallel processing are solved in similar ways. The solution for 
 each problem is common so can be summarized as a pattern. The target problems are most related
-to concurrent operation, parallel processing, throttle control, and I/O sensitive.  
+to concurrent operation, parallel processing, throttle control, and I/O sensitive operations.
 
 These patterns are not as common as the GoF Design Patterns, but are effective and common 
-in specific scenarios. Being aware of these patterns at early design and implementation phase will 
+in specific scenarios. Being aware of these patterns at an early design and implementation phase will 
 be beneficial for performance-critical services.
 
-These patterns are summarized from my own development, so are named per my understanding. 
+_These patterns are summarized from my own development, so are named per my understanding. 
 Some of them may already be summarized by others with a different name. If there's an existing 
-reference, please let me know.
+reference, please let me know._
 
 This list is a work in progress.
 
@@ -33,7 +33,7 @@ This list is a work in progress.
 
 ### Batch Stage Chain
 
-_Fine granular parallel execution based on stages, to achieve better parallelism._
+_Fine granular parallel execution based on stages, for better parallelism._
 
 #### Problem
 Traditional programming languages, functional programming, object-oriented programming, and school 
@@ -74,7 +74,7 @@ each stage. It enables the possibility to achieve better concurrency and perform
 
 
 ### Request Aggregator
-_Aggregate requests and perform in a batch manner._
+_Aggregate requests and perform in a batch manner, while keep the simple style for callers._
 
 #### Problem
 WIP
