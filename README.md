@@ -1,7 +1,7 @@
 # Parallel Processing Patterns (PP Patterns)
 
 ## Introduction
-While developing services with scalability and performance as a major concern, some common problems in parallel processing are solved in similar ways. The solution for each problem is common so can be summarized as pattern. These patterns are not as common as the GOF Design Patterns, but are effective and common in specific scenarios.
+While developing services with scalability, throughput, and performance as major concerns, some common problems in parallel processing are solved in similar ways. The solution for each problem is common so can be summarized as a pattern. These patterns are not as common as the GOF Design Pattern, but are effective and common in specific scenarios. Being aware of these patterns at early design and implementation phase will be benefitial for performance-critical services.
 
 These patterns are summarized from my own development, so are named per my understanding. Some of them may already be summarized by others with a different name. If there's an existing reference, please let me know.
 
@@ -17,7 +17,7 @@ However, when the sequence is complex, especially multiple IO or inter-service c
 
 The solution for such a problem is to break the sequential operation into multiple stages. Within each stage, batch IO or inter-service call is utilized as optimization and concurrency happen at this level. The stages are chained together by producer-consumer pattern. The output of a previous stage is fed as the input of the next stage in the chain. Let's call this pattern as "Batch Stage Chain". Such a pattern in many cases has better scalability, throughput, and parallelism than the Parallel Sequential Unit pattern.
 
-Variety implementation of the Batch Stage Chain pattern already exist nowadays, but programmers may not be aware of it from a generic point of view. This booth tries to summarize this pattern, and visualize its behavior in comparison with the Parallel Sequential Unit pattern. So that programmers have an explicit impression of the pattern, and could adopt it at an early phase of performance-critical projects.
+Variety implementation of the Batch Stage Chain pattern already exist nowadays, but programmers may not be aware of it from a generic point of view. This booth tries to summarize this pattern, and visualize its behavior in comparison with the Parallel Sequential Unit pattern. So that programmers have an explicit impression of the pattern, and  adopt it at an early phase of performance-critical projects.
 
 ### I/O Aggregator Pattern
 WIP
