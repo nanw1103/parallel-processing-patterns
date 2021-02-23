@@ -1,5 +1,18 @@
 # Parallel Processing Patterns (PP-Patterns)
 
+**Table of contents**
+
+- [Introduction](#introduction)
+
+- [PP-Patterns](#pp-patterns)
+
+  - [Batch Stage Chain](#batch-stage-chain)
+
+  - [Request Aggregator](#request-aggregator)
+
+  - [Rolling Poller Window](#rolling-poller-window)
+
+
 ## Introduction
 While developing services with scalability, throughput, and performance as major concerns, 
 some common problems in parallel processing are solved in similar ways. The solution for 
@@ -16,7 +29,7 @@ reference, please let me know.
 
 This list is a work in progress.
 
-## PP Patterns
+## PP-Patterns
 
 ### Batch Stage Chain
 
@@ -60,7 +73,7 @@ each stage. It enables the possibility to achieve better concurrency and perform
 * The solution is non-intuitive than Parallel Sequential Units.  
 
 
-### I/O Aggregator
+### Request Aggregator
 _Aggregate requests and perform in a batch manner._
 
 #### Problem
