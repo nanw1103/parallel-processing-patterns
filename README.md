@@ -6,11 +6,11 @@
 
 - [PP-Patterns](#pp-patterns)
 
-  - [Batch Stage Chain](#batch-stage-chain)
+  - [1. Batch Stage Chain](#1-batch-stage-chain)
 
-  - [Request Aggregator](#request-aggregator)
+  - [2. Request Aggregator](#2-request-aggregator)
 
-  - [Rolling Poller Window](#rolling-poller-window)
+  - [3. Rolling Poller Window](#3-rolling-poller-window)
 
 
 ## Introduction
@@ -31,7 +31,7 @@ This list is a work in progress.
 
 ## PP-Patterns
 
-### Batch Stage Chain
+### 1. Batch Stage Chain
 
 _Fine granular parallel execution based on stages, for better parallelism._
 
@@ -73,7 +73,7 @@ each stage. It enables the possibility to achieve better concurrency and perform
 * The solution is non-intuitive than Parallel Sequential Units.  
 
 
-### Request Aggregator
+### 2. Request Aggregator
 _Aggregate requests and perform in a batch manner, while keep the simple style for callers._
 
 #### Problem
@@ -85,7 +85,7 @@ WIP
 #### Consequences
 WIP
 
-### Rolling Poller Window
+### 3. Rolling Poller Window
 _Polling states of large number of items with throttle control._
 
 #### Problem
