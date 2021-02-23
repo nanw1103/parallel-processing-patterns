@@ -1,4 +1,4 @@
-# Parallel Processing Patterns (PP Patterns)
+# Parallel Processing Patterns (PP-Patterns)
 
 ## Introduction
 While developing services with scalability, throughput, and performance as major concerns, 
