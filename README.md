@@ -27,13 +27,13 @@ Traditional programming languages, functional programming, object-oriented progr
 education normally leads programmer to write programs as function units from the beginning. 
 That's normally a good practice for implementing sequential scenarios: a self-contained function unit. 
 
-![self-contained unit](https://github.com/nanw1103/parallel-processing-patterns/blob/master/images/self-contained-unit.png?raw=true)
+![self-contained unit](images/self-contained-unit.png?raw=true)
 
 When parallelism is needed, a natural process is to reuse the existing function unit as a building block 
 and run it in parallel to achieve speed and performance. Such an easy and straightforward approach normally 
 works well at the beginning. Let's call this pattern as "Parallel Sequential Units".
 
-![Parallel Sequential Units](https://github.com/nanw1103/parallel-processing-patterns/blob/master/images/parallel-sequential-units.png?raw=true)
+![Parallel Sequential Units](images/parallel-sequential-units.png?raw=true)
 
 
 However, when the sequence is complex, especially multiple heavyweight operations (I/O or inter-service calls)
@@ -51,7 +51,8 @@ operation could also be optimized using batch operations and concurrency happen 
 are chained together by producer-consumer pattern. The output of a previous stage is fed as the input of the 
 next stage in the chain. Let's call this pattern as "Batch Stage Chain". Such a pattern in many cases has better 
 performance than the Parallel Sequential Units pattern, at the cost of non-intuitive implementation.
-![Batch Stage Chain](https://github.com/nanw1103/parallel-processing-patterns/blob/master/images/batch-stage-chain.png?raw=true)
+
+![Batch Stage Chain](images/batch-stage-chain.png?raw=true)
 
 #### Consequences
 * Since multiple calls of the same operation are handled together in a stage, optimization can be applied within 
