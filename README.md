@@ -59,7 +59,6 @@ that has sequential model as native support.
 
 The following is an example of sequential operations:
 
-`
 
     Make a phone call to R2D2
 
@@ -72,7 +71,7 @@ The following is an example of sequential operations:
     Ask 3-PO to translate an article (which takes some time), and wait for response
 
     Print the translation
-`
+
 
 The example is easy to write and understand because human mind is suitable for this style. The
 tasks (translation process) run on separate systems (the robots), and is logically parallel from the
@@ -95,7 +94,6 @@ sequential logic style, while support parallel operation.
 
 Example of parallel execution using threads 
 
-`
 
     Thread 1:
     
@@ -114,11 +112,10 @@ Example of parallel execution using threads
         Print the translation
         
     Run thread 1 and thread 2 concurrently
-` 
+
 
 Example of parallel execution using callbacks 
 
-`
 
      Make a phone call to R2D2
 
@@ -131,7 +128,7 @@ Example of parallel execution using callbacks
      Ask 3-PO to translate an article (non-blocking), upon on response do:
 
         Print the translation
-` 
+
 
 ### Programming model evolved
 
