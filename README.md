@@ -6,7 +6,7 @@
 - [Consideration on Parallel Style and Synchronization Models](#consideration-on-parallel-style-and-synchronization-models)
   - [Computer system fundamentally supports concurrent execution](#computer-system-fundamentally-supports-concurrent-execution)
   - [Sequential programming is the origin](#sequential-programming-is-the-origin)
-  - [Parallelism and asynchronous operation are required](#parallelism-and-asynchronous-operation-are-required)
+  - [Parallelism and asynchronous model are required](#parallelism-and-asynchronous-model-are-required)
   - [Programming model evolved](#programming-model-evolved)
 - [PP-Patterns](#pp-patterns)
 
