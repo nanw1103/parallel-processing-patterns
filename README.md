@@ -3,7 +3,11 @@
 **Table of contents**
 
 - [Introduction](#introduction)
-
+- [Consideration on Parallel Style and Synchronization Models](#consideration-on-parallel-style-and-synchronization-models)
+  - [Computer system fundamentally supports concurrent execution](#computer-system-fundamentally-supports-concurrent-execution)
+  - [Sequential programming is the origin](#sequential-programming-is-the-origin)
+  - [Parallelism and asynchronous operation are required](#parallelism-and-asynchronous-operation-are-required)
+  - [Programming model evolved](#programming-model-evolved)
 - [PP-Patterns](#pp-patterns)
 
   - [1. Batch Stage Chain](#1-batch-stage-chain)
@@ -29,6 +33,143 @@ reference, please let me know._
 
 This list is a work in progress.
 
+## Consideration on Parallel Style and Synchronization Models
+
+### Computer system fundamentally supports concurrent execution 
+Modern computer system normally adopts the interrupt mechanism for I/O. Upon signaled, it triggers the 
+CPU to suspend the current routine and run a different routine. Though the per-CPU execution is 
+still sequential at micro level, the execution model exposed is logically parallel. Considering multiple 
+CPUs and/or cores, a computer system fundamentally supports concurrent execution, and suitable for 
+asynchronous model.
+
+However, such asynchronous model is not intuitive to human mind, which is more 
+comfortable with _sequential operations_. It's also non-intuitive to write synchronous routines down. 
+
+### Sequential programming is the origin 
+One could debate whether programming is for the computer to execute, or for human to write and read.
+If we look back upon the evolution of programming languages, we can see that in the last 60 years,
+programming language is evolving from computer friendly (punched card) to human friendly (assembly, 
+C++, Python). The programming languages aims to optimize for human: make read and write easier. The 
+computer oriented optimization is taken care by compiler, programming model by each language, and OS
+stacks.
+
+So human-friendly is a key for programming languages, and sequential operation is easy to be understood
+and written down. Most of high-level programming languages today are _concurrent programming languages_,
+that has sequential model as native support.    
+
+The following is an example of sequential operations:
+
+`
+
+    Make a phone call to R2D2
+
+    Ask R2D2 to translate an article (which takes some time), and wait for response
+    
+    Print the translation
+
+    Make a phone call to 3-PO
+
+    Ask 3-PO to translate an article (which takes some time), and wait for response
+
+    Print the translation
+`
+
+The example is easy to write and understand because human mind is suitable for this style. The
+tasks (translation process) run on separate systems (the robots), and is logically parallel from the
+run of the main logic above. However, in many cases, we model the process like shown above, because
+it has an undeniable advantage: easy to create and read for human. The key point in achieving this, 
+is that the parallel execution is converted to a blocking operation: "ask and wait". This style is commonly 
+adopted, at OS level, in libraries, and at application layers. And this blocking style is commonly 
+supported natively by many programming languages, C, Java, Python, etc.
+
+### Parallelism and asynchronous model are required
+
+The cost of sequential operation is obvious: the parallelism and asynchronous capability provided by the
+system is not utilized. So, the execution could take longer time and the CPU/IO is not fully utilized. Then
+it comes to multiple technologies for this:
+
+* Thread: OS level thread and the programming language side counterpart. Threading nicely retains the 
+sequential logic style, while support parallel operation.
+* Callback: describe what to do upon an event 
+  
+
+Example of parallel execution using threads 
+
+`
+
+    Thread 1:
+    
+        Make a phone call to R2D2
+
+        Ask R2D2 to translate an article (which takes some time), and wait for response
+
+        Print the translation
+        
+    Thread 2:
+
+        Make a phone call to 3-PO
+
+        Ask 3-PO to translate an article (which takes some time), and wait for response
+
+        Print the translation
+        
+    Run thread 1 and thread 2 concurrently
+` 
+
+Example of parallel execution using callbacks 
+
+`
+
+     Make a phone call to R2D2
+
+     Ask R2D2 to translate an article (non-blocking), upon on response do:
+     
+        Print the translation
+        
+     Make a phone call to 3-PO
+
+     Ask 3-PO to translate an article (non-blocking), upon on response do:
+
+        Print the translation
+` 
+
+### Programming model evolved
+
+One interesting observation I had is about asynchronous pattern as first-class support in programming
+languages. Before talking about that, let's look back upon the sequential programming model: 
+threading.
+
+Threading model has its own advantages, derived from OS native implementation. It helps to 
+sequentially describe the steps to complete a task. That is based on the synchronous nature:
+synchronous operations are easier to describe and understand. But when asynchronous is the main theme,
+the sequential model is hard to optimize. This difficulty is caused by the model provided by programming
+language itself. You may think, is there a different model, that can describe asynchronous problems easier? 
+Then genius invented asynchronous-native languages, like JavaScript, which do everything asynchronously by 
+default, and the runtime handles the asynchronous operation to lower-level calls (OS, I/O), hiding the 
+complexity from programmers. Such languages are fluent to describe asynchronous tasks.
+
+Examples of sequential-native languages are C++, Java, and Python. By their nature, it's easy to describe
+sequential problems.
+Examples of asynchronous-native languages are JavaScript family (CoffeeScript, TypeScript). By their nature, 
+it's easy to describe parallel routine.
+
+The interesting thing is, for these two styles, none of them dominates. Later, sequential-native languages
+added features to support describing in the asynchronous way, by introducing concepts like Future in Java 
+and C++, _async_ and _await_ in C#, Rx framework, etc. These are easy to achieve in asynchronous-native 
+languages like JavaScript. While JavaScript also introduced _await_ later to improve the capability to 
+describe sequential operations.
+
+There are other models and concepts which fundamentally simplify how parallelism problems are described or
+concurrency achieved. For example, Java Executor, Java Parallel Streaming, Erlang messaging, 
+Golang channel, Golang goroutine. More details are being hidden from developers, and the models
+and concepts are better in abstraction for describing common problems.
+
+No matter how the building block evolves, one of the core problems to solve for a I/O centric and performance
+sensitive service remains unchanged: to identify the cross-boundary heavyweight operations, utilize the 
+building blocks to optimize these operations via parallelism or batch, reduce number of calls, to achieve
+shorter execution time, higher throughput, and lower system cost.   
+ 
+ 
 ## PP-Patterns
 
 ### 1. Batch Stage Chain
