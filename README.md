@@ -254,15 +254,26 @@ Single-resource operation interface is reserved, while batch operation can be ap
 heavy calls. With careful design, the number of corss-system calls can be reduced.
 
 ### 3. Rolling Poller Window
-_Polling states of large number of items with throttle control._
+_Poll states of large number of items with controlled batches._
 
 #### Problem
-WIP
+When large number of items needs to be polled, sometimes it may not be possible to poll them all together, and 
+polling each item individually is normally inefficient.
+So it is needed to divide the operation into small batches, to meet the target service requirements. For example,
+batch size limit, response size limit, quota limit of number of API calls, etc.
 
 #### Solution
-WIP
+In the array of the target items, a rolling window is used to select the items to poll. The window has a size which is
+selected according to the target system requirement for optimization. In each turn, only the items in the poller 
+window are polled from the target system, ideally as a single batch. The result is cached locally. The poller window 
+moves on inside the array, until it reaches the end. Then the items are reorgnized, either in the array or 
+using separate data structures, so that only the unfinished items are remaining in the array as the polling target. 
+The rolling window continues. This process continues until all items reaches to desired completion state. 
+ 
 ![Rolling Poller Window](images/rolling-poller-window.png?raw=true)
 
 #### Consequences
-WIP
+Requests to the target system are fired in a controlled manner, within constraints of the target system.
+This mechanism also works well with dynamic adding or removing items during the run. 
+The Rolling Poller Window could be used together with Request Aggregator.
 
