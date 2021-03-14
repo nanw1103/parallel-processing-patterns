@@ -215,43 +215,13 @@ each stage. It enables the possibility to achieve better concurrency and perform
 _Aggregate requests and perform in a batch manner, while keep the simple style for callers._
 
 #### Problem
-Operating a single resource is normally easier than operating multiple resources at the same time. Single-resource 
-operation is easy to understand, easy to design, and easy to implement: in general, more human mind friendly. 
-Exposing single-resource operation interface is a common style, chosen by software systems and libraries. For 
-example, in a book store management system, the interface to get a single book versus the interface to get 
-multiple books.
-
-Due to the layering in software design, such single-resource operation interface style is inherited and spread to 
-multiple layers and related systems. 
-
-In such a context, when operation on multiple resources is needed, due to the software layering and existing 
-interfaces, it may leave developers no choices but stick to the single-resource operations. For example, a 
-third-party cloud service which exposes only single-resource operation, and it's out of our control. 
-
-For performance-related scenario, when operating on multiple resources, making concurrent calls using the single 
-resource-operation is a natural choice. This is similar to the aforementioned self-contained function unit, 
-in a previous section. Such approach has lots of advantages in practice, and in many cases may be the best choice. 
-However, when additional performance is needed, it will be hard.
-
-One example is the network socket I/O library provided by OS. At OS level, reflecting the underlying hardware, 
-the socket presentation and operation are both handled as a batch, examples are Linux epoll, and Windows completion
-port. However, high-level libraries tend to expose the interfaces to operate a single socket, e.g. read from a socket. 
-Then when multiple sockets are to be read concurrently, we see lots of implementation use threads to achieve 
-concurrent operations. One of the advantages of such style is easy-to-read: for the function unit, it's still a 
-single socket that is being operated, in some sequence. But in the layers under the API, it's either not optimized,
-or requires good design and implementation to achieve the easy-to-use single resource interface, while not losing
-the batch operation advantages. 
+WIP
 
 #### Solution
-
-The aggregator pattern aims to preserve the easy-to-use single-resource operation interfaces, while utilizing 
-batch operations to optimize cross-system calls, which are normally heavy. 
-
-![Request Aggregator](images/request-aggregator.png?raw=true)
+WIP
 
 #### Consequences
-Single-resource operation interface is reserved, while batch operation can be applied to optimize cross-system
-heavy calls. With careful design, the number of corss-system calls can be reduced.
+WIP
 
 ### 3. Rolling Poller Window
 _Polling states of large number of items with throttle control._
@@ -261,7 +231,6 @@ WIP
 
 #### Solution
 WIP
-![Rolling Poller Window](images/rolling-poller-window.png?raw=true)
 
 #### Consequences
 WIP
