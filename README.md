@@ -276,7 +276,7 @@ This mechanism also works well with dynamic adding or removing items during the 
 A system could use the Rolling Poller Window together with the Request Aggregator.
 
 ### 4. Sparse Task
-_Break long-run tasks into multiple short-run tasks for scalability._
+_Break a long-run task into multiple transient tasks for scalability._
 
 #### Problem
 The distributed task, provided by a [task scheduler](https://en.wikipedia.org/wiki/Job_scheduler), is commonly used in management systems for reliability, scalability, and decoupling responsibilities, in [Shared-nothing Architecture](https://en.wikipedia.org/wiki/Shared-nothing_architecture).
