@@ -296,8 +296,11 @@ While such a long-run style is good because of intuitive in many cases, it has t
 #### Solution
 A sparse task breaks a long-run task into multiple small and independent pieces. It changes the overall structure from a polling model to an event-driven model. Sparse Task pattern consists of the following components:
 1. **Submitter**: performs the actual task operation, and schedules a _timeout monitor task_ on _task scheduler_, per task.
-2. **Timeout monitor task**: a scheduled task, upon running, notifies the _event handler_ that the task is timed out. This task is normally a distributed task for reliability.
+2. **Timeout monitor task**: a scheduled task, upon running, notifies the _event handler_ that the task is timed out. 
 3. **Event Handler**: handler to task completion events.
+
+The Submitter may or may not be a distributed task, depends on the actual implementation.
+The monitor task is normally a distributed task for reliability, e.g. the task should survive service restart. One of the principles for a reliable task system is to never hold states in process/thread. State from the persistence layer is the only source of truth.
 
 ![Sparse Task Pattern](images/sparse-task-pattern-sequence.png?raw=true)
 
