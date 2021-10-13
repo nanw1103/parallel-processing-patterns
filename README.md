@@ -284,37 +284,37 @@ The Rolling Poller Window could be used together with the Request Aggregator.
 _Break long-run tasks into multiple short-run tasks for scalability._
 
 #### Problem
-Distributed job, provided by [job scheduler](https://en.wikipedia.org/wiki/Job_scheduler), is a common concept used in service systems, for decoupling, reliability, and scalability, in [Shared-nothing Architecture](https://en.wikipedia.org/wiki/Shared-nothing_architecture). The application submits jobs to a job scheduler, and the jobs are executed in the background in a reliable and distributed manner. 
-A conventional and intuitive implementation of a long-run job normally has the following sequence:
+Distributed task, provided by a [task scheduler](https://en.wikipedia.org/wiki/Job_scheduler), is a common concept used in management systems, for reliability, scalability, and decoupling responsibilities, in [Shared-nothing Architecture](https://en.wikipedia.org/wiki/Shared-nothing_architecture). The application submits tasks to a task scheduler, and the tasks are executed in the background in a reliable and distributed manner. 
+A conventional and intuitive implementation of a long-run task normally has the following sequence:
 
-1. Perform some operation
-2. Wait for the completion, which normally involves repeated polling from a target service.
+1. Perform some operations
+2. Wait for certain completion, which normally involves repeated polling from a target service.
 3. Complete the task, as successful, canceled, or error.
 
-While such a long-run pattern is good because of intuitive in many cases, it has the following drawbacks:
-1. Each long-run job occupies an execution capacity from the job scheduler, normally a thread. Thus the total long-run jobs that can be processed at the same time are limited by the capacity of the scheduler. The system throughput of jobs is limited. 
+While such a long-run style is good because of intuitive in many cases, it has the following drawbacks:
+1. Each long-run task occupies an execution capacity from the scheduler, normally a thread. Thus the total long-run tasks that can be processed at the same time are limited by the capacity of the scheduler. The system throughput is limited. 
 2. The polling model incurs additional I/O.
-3. Hard to aggregate inter-system I/O as batches for optimization, since distributed jobs could run on different nodes in a cluster.
+3. It's hard to aggregate inter-system I/O as batches for optimization, since distributed tasks could run on different nodes in a cluster.
 
 ![Conventional Long-run Task](images/sparse-task-conventional-long-run-task.png?raw=true)
 
 #### Solution
-A sparse task breaks the long-run task into multiple pieces. Change the overall structure from a polling model to an event-driven model. Sparse Task pattern consists of the following components:
+A sparse task breaks a long-run task into multiple small and independent pieces. It changes the overall structure from a polling model to an event-driven model. Sparse Task pattern consists of the following components:
 1. **Submitter**: performs the actual task operation, and schedules a _timeout monitor task_ on _task scheduler_, per task.
-2. **Event Handler**: handler to task completion events.
-3. **Timeout monitor task**: a scheduled task, upon running, notifies the _event handler_ that the task is timed out.
+2. **Timeout monitor task**: a scheduled task, upon running, notifies the _event handler_ that the task is timed out.
+3. **Event Handler**: handler to task completion events.
 
 ![Sparse Task Pattern](images/sparse-task-pattern-sequence.png?raw=true)
 
-This pattern relies on a callback to notify the event handler about task completion. Example callbacks are message bus events, Webhook callbacks. If the messaging infrastructure does not exist, the pattern can still be achieved by a batch poller based callback:
+This pattern relies on a callback to notify the event handler about task completion. Example are message bus events, Webhook, etc. If the messaging infrastructure does not exist, the callback can still be achieved by a polling mechanism:
 
 ![Notification by Batch Poller](images/notification-by-batch-polling.png)
 
 
 #### Consequences
 
-1. Scalability increases since the task scheduler capacity (threads) are not occupied by the blocking logic per long-run task. Tasks that more than the number of scheduler worker capacity can run logically in parallel.
-2. Task implementation is simplified. With long-run tasks, in a high-available environment, the full task logic with all internal steps should be implemented as idempotent. With sparse tasks, each small piece needs to be idempotent, which is easier.
+1. Scalability increases, since the task scheduler capacity (threads) are not occupied by the blocking logic per long-run task. More tasks than the number of scheduler worker capacity can logically run in parallel.
+2. Task implementation is simplified. With long-run tasks, in a high-available environment, the full task logic with all internal steps should be implemented as idempotent. With sparse tasks, each small piece needs to be idempotent, which is normally easier.
 3. System I/O is reduced, by moving from polling pattern to event-driven pattern.
 4. Task tracking of sparse tasks is more complex and may require additional consideration to track the logical task.
 5. System dependency increase. Normally polling is simpler and callback or messaging requires additional infrastructure.
