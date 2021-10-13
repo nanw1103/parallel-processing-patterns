@@ -9,15 +9,10 @@
   - [Parallelism and asynchronous model are required](#parallelism-and-asynchronous-model-are-required)
   - [Programming model evolved](#programming-model-evolved)
 - [PP-Patterns](#pp-patterns)
-
   - [1. Batch Stage Chain](#1-batch-stage-chain)
-
   - [2. Request Aggregator](#2-request-aggregator)
-
   - [3. Rolling Poller Window](#3-rolling-poller-window)
-
   - [4. Sparse Task](#4-sparse-task)
-
   - [5. Ledger](#5-ledger)
 
 ## Introduction
@@ -301,7 +296,7 @@ While such a long-run style is good because of intuitive in many cases, it has t
 #### Solution
 A sparse task breaks a long-run task into multiple small and independent pieces. It changes the overall structure from a polling model to an event-driven model. Sparse Task pattern consists of the following components:
 1. **Submitter**: performs the actual task operation, and schedules a _timeout monitor task_ on _task scheduler_, per task.
-2. **Timeout monitor task**: a scheduled task, upon running, notifies the _event handler_ that the task is timed out.
+2. **Timeout monitor task**: a scheduled task, upon running, notifies the _event handler_ that the task is timed out. This task is normally a distributed task for reliability.
 3. **Event Handler**: handler to task completion events.
 
 ![Sparse Task Pattern](images/sparse-task-pattern-sequence.png?raw=true)
@@ -318,6 +313,8 @@ This pattern relies on a callback to notify the event handler about task complet
 3. System I/O is reduced, by moving from polling pattern to event-driven pattern.
 4. Task tracking of sparse tasks is more complex and may require additional consideration to track the logical task.
 5. System dependency increase. Normally polling is simpler and callback or messaging requires additional infrastructure.
+
+The Sparse Task pattern depends on scheduling from distributed task scheduler to monitor task timeout. One timeout task is associated with one logical long-run task. This model handles each task individually. An alternative is to handle a large number of items in batches, which is covered by the Ledger pattern.
 
 ### 5. Ledger
 WIP
