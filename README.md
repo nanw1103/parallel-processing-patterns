@@ -202,7 +202,7 @@ performance than the Parallel Sequential Units pattern at the cost of non-intuit
 ![Batch Stage Chain](images/batch-stage-chain.png?raw=true)
 
 #### Consequences
-* Since multiple calls of the same operation are handled together in a stage. Each stage adopts optimization natively.
+* Since multiple calls of the same operation are handled together in a stage, each stage can apply optimization natively.
 It enables the possibility to achieve better concurrency and performance.
 * The solution is non-intuitive than Parallel Sequential Units. 
 
