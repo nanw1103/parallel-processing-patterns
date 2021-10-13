@@ -1,0 +1,63 @@
+Id,Name,Shape Library,Page ID,Contained By,Group,Line Source,Line Destination,Source Arrow,Destination Arrow,Text Area 1
+1,Page,,,,,,,,,sparse-task-pattern-sequence
+2,Rectangle,Geometric Shapes,1,,,,,,,
+3,Rectangle,Geometric Shapes,1,,,,,,,
+4,Activation,UML,1,,,,,,,
+5,Activation,UML,1,,,,,,,
+6,Activation,UML,1,,,,,,,
+7,Class,UML,1,,,,,,,Sparse Task - Submitter
+8,Class,UML,1,,,,,,,Task Scheduler
+9,Class,UML,1,,,,,,,Sparse Task - Timeout Monitor Task
+10,Text,Standard,1,,45,,,,,Sparse Task Pattern
+11,Class,UML,1,,,,,,,Target Service
+12,Activation,UML,1,,,,,,,
+13,Class,UML,1,,,,,,,Sparse Task - Event Handler
+14,Activation,UML,1,,,,,,,
+15,Activation,UML,1,,,,,,,
+16,Activation,UML,1,,,,,,,
+17,Activation,UML,1,,,,,,,
+18,Text,Standard,1,,,,,,,Normal Path
+19,Activation,UML,1,,,,,,,
+20,Activation,UML,1,,,,,,,
+21,Text,Standard,1,,,,,,,Timeout Path
+22,Text,Standard,1,,,,,,,OR
+23,Line,,1,,,7,,None,None,
+24,Line,,1,,,8,,None,None,
+25,Line,,1,,,9,,None,None,
+26,Line,,1,,,4,5,None,Arrow,Schedule timeout monitor task
+27,Line,,1,,,11,,None,None,
+28,Line,,1,,,4,12,None,Arrow,Perform operation
+29,Line,,1,,,4,4,None,Arrow,Complete submission
+30,Line,,1,,,5,6,None,Arrow,Instantiate
+31,Line,,1,,,6,5,None,Arrow,
+32,Line,,1,,,5,4,None,Arrow,
+33,Line,,1,,,12,4,None,Arrow,
+34,Line,,1,,,13,,None,None,
+35,Line,,1,,,14,15,None,Arrow,Completion callback (success/failure)
+36,Line,,1,,,15,16,None,Arrow,Cancel monitor task
+37,Line,,1,,,16,17,None,Arrow,Cancel
+38,Line,,1,,,15,15,None,Arrow,"Complete task 
+(succcess/failure)"
+39,Line,,1,,,20,19,None,Arrow,Timeout
+40,Line,,1,,,19,19,None,Arrow,"Complete Task
+(timeout)"
+41,Line,,1,,,18,22,None,None,
+42,Line,,1,,,22,21,None,None,
+43,Line,,1,,,17,16,None,Arrow,
+44,Line,,1,,,16,15,None,Arrow,
+45,Group 1,,1,,,,,,,
+46,Page,,,,,,,,,notification-by-batch-polling
+47,Class,UML,46,,,,,,,Batch Poller
+48,Class,UML,46,,,,,,,Target Service
+49,Class,UML,46,,,,,,,Sparse Task - Event Handler
+50,Activation,UML,46,,,,,,,
+51,Activation,UML,46,,,,,,,
+52,Activation,UML,46,,,,,,,
+53,Text,Standard,46,,60,,,,,Notification by Batch Poller
+54,Line,,46,,,48,,None,None,
+55,Line,,46,,,47,,None,None,
+56,Line,,46,,,49,,None,None,
+57,Line,,46,,,50,51,None,Arrow,Batch polling
+58,Line,,46,,,51,50,None,Arrow,
+59,Line,,46,,,50,52,None,Arrow,Notify
+60,Group 1,,46,,,,,,,
