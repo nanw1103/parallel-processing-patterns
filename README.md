@@ -16,9 +16,9 @@
 
   - [3. Rolling Poller Window](#3-rolling-poller-window)
 
-  - [4. Sparse Task] (#4-sparse-task)
+  - [4. Sparse Task](#4-sparse-task)
 
-  - [5. Ledger] (#5-ledger)
+  - [5. Ledger](#5-ledger)
 
 ## Introduction
 While developing services with scalability, throughput, and performance as major concerns, 
@@ -320,12 +320,4 @@ This pattern relies on a callback to notify the event handler about task complet
 5. System dependency increase. Normally polling is simpler and callback or messaging requires additional infrastructure.
 
 ### 5. Ledger
-
-#### Problem
-WIP
-
-#### Solution
-WIP
-
-#### Consequences
 WIP
