@@ -3,7 +3,7 @@
 **Table of contents**
 
 - [Introduction](#introduction)
-- [Consideration on Parallellism and Synchronization](#consideration-on-parallellism-and-synchronization)
+- [Consideration on Parallelism and Synchronization](#consideration-on-parallelism-and-synchronization)
   - [Computer System Fundamentally Supports Parallel Processing](#computer-system-fundamentally-supports-parallel-processing)
   - [Sequential Programming Is The Origin](#sequential-programming-is-the-origin)
   - [Parallelism And Asynchronous Model Are Needed](#parallelism-and-asynchronous-model-are-needed)
