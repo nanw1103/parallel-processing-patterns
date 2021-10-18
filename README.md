@@ -167,11 +167,16 @@ shorter execution time, higher throughput, and lower system cost.
 
 An engineer makes designs according to experiences, and an architect makes designs according to methodologies.
 
-### 1. Identify unrelated operations at the highest level, and isolate them
-Isolation at the highest level solves the core problem in parallel processing. If architecturally a design is
-sequential, there will be little margin to enhance at the micro-level.
+### 1. Isolation at the highest level
+Identify unrelated operations at the highest level, isolate and process them in parallel. Isolation at the
+highest level solves the core problem in parallel processing, and avoids contention. If a design is sequential
+architecturally, there will be little margin to enhance at the micro-level.
 
 ### 2. Favor batch operations
+Software engineering is similar to making a castle with building blocks. The feature of your building blocks
+impacts how you build the castle. Therefore, understand the building blocks and choose the proper ones will be
+beneficial. In most cases, as building blocks provided by the layers you depend on, batch operations are designed
+for optimization and will outperform single-resource operations if appropriately used.
 
 ### 3. Plan system scalability limit
 Every system within its lifecycle has a scalability limit. Identifying the limit and design according to it.
