@@ -33,7 +33,7 @@ _These patterns are gathered from my development and named per my understanding.
 Others may have already identified some of them with different names. If there's an existing
 reference, please let me know._
 
-This list is a work in progress.
+Source: [https://github.com/nanw1103/parallel-processing-patterns/blob/main/README.md](https://github.com/nanw1103/parallel-processing-patterns/blob/main/README.md)
 
 ## Consideration on Parallelism and Synchronization
 
