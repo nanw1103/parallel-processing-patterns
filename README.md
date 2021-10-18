@@ -9,6 +9,9 @@
   - [Parallelism And Asynchronous Model Are Needed](#parallelism-and-asynchronous-model-are-needed)
   - [Programming Model Evolved](#programming-model-evolved)
 - [Parallel Processing Principles](#parallel-processing-principles)
+  - [1. Isolation At The Top](#1-isolation-at-the-top)
+  - [2. Favor Batch Operations](#2-favor-batch-operations)
+  - [3. Plan System Limit](#3-plan-system-limit)
 - [PP-Patterns](#pp-patterns)
   - [1. Batch Stage Chain](#1-batch-stage-chain)
   - [2. Request Aggregator](#2-request-aggregator)
@@ -167,18 +170,18 @@ shorter execution time, higher throughput, and lower system cost.
 
 An engineer makes designs according to experiences, and an architect makes designs according to methodologies.
 
-### 1. Isolation at the highest level
+### 1. Isolation At The Top
 Identify unrelated operations at the highest level, isolate and process them in parallel. Isolation at the
 highest level solves the core problem in parallel processing and avoids contention. If a design is sequential
 architecturally, there will be little margin to enhance at the micro-level.
 
-### 2. Favor batch operations
+### 2. Favor Batch Operations
 Software engineering is similar to making a castle with building blocks. The feature of your building blocks
 impacts how you build a castle. Therefore, understand the building blocks and choose the proper ones will be
 beneficial. In most cases, as building blocks provided by the layers you depend on, batch operations are designed
 for optimization and will outperform single-resource operations if appropriately used.
 
-### 3. Plan system limit
+### 3. Plan System Limit
 Every system within its lifecycle has a scalability limit. Identify the limit at the design phase will clear your way
 to build the system.
 
