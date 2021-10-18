@@ -3,11 +3,11 @@
 **Table of contents**
 
 - [Introduction](#introduction)
-- [Consideration on Parallel Style and Synchronization Models](#consideration-on-parallel-style-and-synchronization-models)
-  - [Computer system fundamentally supports concurrent execution](#computer-system-fundamentally-supports-concurrent-execution)
-  - [Sequential programming is the origin](#sequential-programming-is-the-origin)
-  - [Parallelism and asynchronous model are required](#parallelism-and-asynchronous-model-are-required)
-  - [Programming model evolved](#programming-model-evolved)
+- [Consideration on Parallellism and Synchronization](#consideration-on-parallellism-and-synchronization)
+  - [Computer System Fundamentally Supports Parallel Processing](#computer-system-fundamentally-supports-parallel-processing)
+  - [Sequential Programming Is The Origin](#sequential-programming-is-the-origin)
+  - [Parallelism And Asynchronous Model Are Needed](#parallelism-and-asynchronous-model-are-needed)
+  - [Programming Model Evolved](#programming-model-evolved)
 - [Parallel Processing Principles](#parallel-processing-principles)
 - [PP-Patterns](#pp-patterns)
   - [1. Batch Stage Chain](#1-batch-stage-chain)
@@ -21,7 +21,7 @@ While developing services, with scalability, throughput, and performance as sign
 some common problems in parallel processing emerge. The solution for
 each situation is shareable, so I'm summarizing them as patterns. The target problems are mostly concurrent operations, parallel processing, throttle control, and I/O sensitive operations.
 
-These patterns are not as common as the GoF Design Patterns but are practical in specific scenarios. 
+These patterns are not as common as the GoF Design Patterns but are practical in specific scenarios.
 Being aware of these patterns at an early design and implementation phase will
 be beneficial for performance-critical services.
 
@@ -31,19 +31,19 @@ reference, please let me know._
 
 This list is a work in progress.
 
-## Consideration on Parallel Style and Synchronization Models
+## Consideration on Parallelism and Synchronization
 
-### Computer system fundamentally supports concurrent execution
+### Computer System Fundamentally Supports Parallel Processing
 The modern computer system typically adopts the interrupt mechanism for I/O. Upon signal, it triggers the
 CPU to suspend the current path and execute a different one. Though the per-CPU execution is
 still sequential at the micro-level, the execution model exposed is logically parallel. Considering multiple
-CPUs and cores, a computer system fundamentally supports concurrent execution and is suitable for the
+CPUs and cores, a computer system fundamentally supports parallel execution and is suitable for the
 asynchronous model.
 
 However, such an asynchronous model is not intuitive to the human mind, which is more
 comfortable with _sequential operations_. It's also non-intuitive to write synchronous routines down.
 
-### Sequential programming is the origin
+### Sequential Programming Is The Origin
 One could debate whether programming is for the computer to execute or for humans to write and read.
 If we look back upon the evolution of programming languages, we can see that in the last 60 years,
 programming languages are evolving from computer-friendly (punched card) to human-friendly (assembly,
@@ -51,9 +51,9 @@ C++, Python). The programming languages aims to optimize for human: make read an
 computer-oriented optimization is taken care of by the compiler, programming model by each language, and OS
 stacks.
 
-So human-friendly is a key for programming languages, and sequential operation is easy to understand and write down. 
-Most high-level programming languages today are _concurrent programming languages_,
-that has a sequential model as native support.  
+So human-friendly is a key for programming languages, and sequential operation is easy to understand and write down.
+Today's most high-level programming languages are _concurrent programming languages_
+that have the sequential model as native support.  
 
 The following is an example of sequential operations:
 
@@ -61,7 +61,7 @@ The following is an example of sequential operations:
   First, make a phone call to R2D2.
 
   Ask R2D2 to translate an article (which takes some time) and wait for a response.
-  
+ 
   Print the translation
 
   Make a phone call to 3-PO.
@@ -79,10 +79,10 @@ is that the parallel execution is converted to a blocking operation: "ask and wa
 adopted, at the OS level, in libraries, and at application layers. And this blocking style is typically
 supported natively by many programming languages, C, Java, Python, etc.
 
-### Parallelism and asynchronous model are required
+### Parallelism And Asynchronous Model Are Needed
 
 The cost of sequential operation is obvious: we are not utilizing the parallelism and asynchronous capability provided by the
-system, and the execution takes longer. Then it comes to multiple technologies for this:
+system, and the execution takes longer. So it comes to multiple technologies for this:
 
 * Thread: OS-level thread and the programming language side counterpart. Threading retains the
 sequential logic style nicely while supports parallel operations.
@@ -93,13 +93,13 @@ Example of parallel execution using threads
 
 
   Thread 1:
-  
+ 
     Make a phone call to R2D2.
 
     Ask R2D2 to translate an article (which takes some time) and wait for a response.
 
     Print the translation
-    
+   
   Thread 2:
 
     Make a phone call to 3-PO.
@@ -107,7 +107,7 @@ Example of parallel execution using threads
     Ask 3-PO to translate an article (which takes some time) and wait for a response.
 
     Print the translation
-    
+   
   Run thread 1 and thread 2 concurrently
 
 
@@ -119,7 +119,7 @@ Example of parallel execution using callbacks
    Ask R2D2 to translate an article (non-blocking), upon on response do:
    
     Print the translation
-    
+   
    Make a phone call to 3-PO.
 
    Ask 3-PO to translate an article (non-blocking), upon on response do:
@@ -127,7 +127,7 @@ Example of parallel execution using callbacks
     Print the translation
 
 
-### Programming model evolved
+### Programming Model Evolved
 
 One interesting observation I had is about the asynchronous patterns as first-class support in programming
 languages. However, before talking about that, let's look back upon the sequential programming model:
@@ -136,7 +136,7 @@ threading.
 The threading model has its advantages derived from OS native implementation. It helps to describe the steps to
 complete a task sequentially. That is due to the synchronous nature:
 synchronous operations are easier to describe and understand. But when asynchronous is the central theme,
-the sequential model is hard to optimize. The model provided by programming languages causes such difficulties. 
+the sequential model is hard to optimize. The model provided by programming languages causes such difficulties.
 You may think, is there a different model that can describe asynchronous problems easier?
 Then genius invented asynchronous-native languages, like JavaScript, which do everything asynchronously by
 default. The runtime handles the asynchronous operation to lower-level calls (OS, I/O), hiding the
@@ -161,7 +161,7 @@ and concepts are better in abstraction for describing common problems.
 No matter how the building block evolves, one of the core problems to solve for I/O centric and performance
 sensitive service remains unchanged: to identify the cross-boundary heavyweight operations, utilize the
 building blocks to optimize these operations via parallelism or batch, reduce the number of calls, to achieve
-shorter execution time, higher throughput, and lower system cost. 
+shorter execution time, higher throughput, and lower system cost.
  
 ## Parallel Processing Principles
 
@@ -169,17 +169,18 @@ An engineer makes designs according to experiences, and an architect makes desig
 
 ### 1. Isolation at the highest level
 Identify unrelated operations at the highest level, isolate and process them in parallel. Isolation at the
-highest level solves the core problem in parallel processing, and avoids contention. If a design is sequential
+highest level solves the core problem in parallel processing and avoids contention. If a design is sequential
 architecturally, there will be little margin to enhance at the micro-level.
 
 ### 2. Favor batch operations
 Software engineering is similar to making a castle with building blocks. The feature of your building blocks
-impacts how you build the castle. Therefore, understand the building blocks and choose the proper ones will be
+impacts how you build a castle. Therefore, understand the building blocks and choose the proper ones will be
 beneficial. In most cases, as building blocks provided by the layers you depend on, batch operations are designed
 for optimization and will outperform single-resource operations if appropriately used.
 
-### 3. Plan system scalability limit
-Every system within its lifecycle has a scalability limit. Identifying the limit and design according to it.
+### 3. Plan system limit
+Every system within its lifecycle has a scalability limit. Identify the limit at the design phase will clear your way
+to build the system.
 
 ## PP-Patterns
 
@@ -207,7 +208,7 @@ are involved, parallel run of the function unit is not optimal in most cases. Be
 better and more effective.
 2. Heavyweight operations could have a concurrency limit or API quota limit. The parallel execution of the existing
 unit, logically doing the same procedure concurrently, could either exceed the heavyweight operation limit (if
-the parallel number is high) or not fully utilize the concurrency capability (if the parallelism number is low). 
+the parallel number is high) or not fully utilize the concurrency capability (if the parallelism number is low).
 
 #### Solution
 The solution for such a problem is to break the sequential operation into multiple stages. Heavyweight operations
@@ -222,14 +223,14 @@ performance than the Parallel Sequential Units pattern at the cost of non-intuit
 #### Consequences
 * Since multiple calls of the same operation are handled together in a stage, each stage can apply optimization natively.
 It enables the possibility to achieve better concurrency and performance.
-* The solution is non-intuitive than Parallel Sequential Units. 
+* The solution is non-intuitive than Parallel Sequential Units.
 
 
 ### 2. Request Aggregator
 _Aggregate requests and perform in a batch manner while keeping the simple style for callers._
 
 #### Problem
-Working with a single resource usually is more straightforward than working with multiple resources at the same time. 
+Working with a single resource usually is more straightforward than working with multiple resources at the same time.
 Single-resource operation is easy to understand, easy to design, and easy to implement: in general, more human-mind friendly.
 Exposing a single-resource operation interface is a typical style chosen by software systems and libraries.
 For example, in a book store management system, the interface to get a single book versus the interface to get
@@ -336,7 +337,8 @@ This pattern relies on a callback to notify the event handler about task complet
 4. Task tracking of sparse tasks is more complex and may require additional consideration to track the logical task.
 5. System dependency increase. Typically polling is more straightforward, and callback or messaging requires additional infrastructure.
 
-The Sparse Task pattern depends on scheduling from distributed task scheduler to monitor task timeout. One timeout task is associated with one logical long-run task. This model handles each task individually. An alternative is to manage a large number of items in batches. The following Ledger pattern covers that.
+The Sparse Task pattern depends on a distributed scheduler to monitor task timeout. One timeout task is associated with one logical long-run task. This model handles each task individually. An alternative is to manage a large number of items in batches. The following Ledger pattern covers that.
 
 ### 5. Ledger
 WIP
+
