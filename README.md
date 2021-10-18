@@ -18,6 +18,7 @@
   - [3. Rolling Poller Window](#3-rolling-poller-window)
   - [4. Sparse Task](#4-sparse-task)
   - [5. Ledger](#5-ledger)
+- [Epilogue](#epilogue)
 
 ## Introduction
 While developing services, with scalability, throughput, and performance as significant concerns,
@@ -345,3 +346,5 @@ The Sparse Task pattern depends on a distributed scheduler to monitor task timeo
 ### 5. Ledger
 WIP
 
+## Epilogue
+The pattern abstraction comes from practice, and it applies back to practice. This process sometimes makes me rethink the way we create software. There's no best pattern for each problem, but there should be a good fit in each context. What actually guide our designs and patterns, are the principles behind, which we summarized from a variety of practices. It's the principles that we'd stick to. Maybe one day in the future, when we look back upon our career, the only thing to stick to is [Doctrine of the Mean](https://en.wikipedia.org/wiki/Doctrine_of_the_Mean).
