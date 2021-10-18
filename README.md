@@ -51,7 +51,7 @@ comfortable with _sequential operations_. It's also non-intuitive to write synch
 One could debate whether programming is for the computer to execute or for humans to write and read.
 If we look back upon the evolution of programming languages, we can see that in the last 60 years,
 programming languages are evolving from computer-friendly (punched card) to human-friendly (assembly,
-C++, Python). The programming languages aims to optimize for human: make read and write easier. The
+C++, Python). The programming languages aim to optimize for human: make read and write easier. The
 computer-oriented optimization is taken care of by the compiler, programming model by each language, and OS
 stacks.
 
@@ -237,7 +237,7 @@ _Aggregate requests and perform in a batch manner while keeping the simple style
 Working with a single resource usually is more straightforward than working with multiple resources at the same time.
 Single-resource operation is easy to understand, easy to design, and easy to implement: in general, more human-mind friendly.
 Exposing a single-resource operation interface is a typical style chosen by software systems and libraries.
-For example, in a book store management system, the interface to get a single book versus the interface to get
+For example, in a bookstore management system, the interface to get a single book versus the interface to get
 multiple books.
 
 Due to the layering in software design, such a single-resource operation interface style is inherited and spread to
@@ -254,7 +254,7 @@ and in many cases, maybe the best choice.
 
 However, when additional performance is needed, it will be hard.
 
-One example is the network socket I/O library provided by OS. The socket presentation and operation are handled as
+One example is the network socket I/O library provided by the OS. The socket presentation and operation are handled as
 a batch at the OS level, reflecting the underlying hardware. Examples are Linux epoll and Windows completion
 port. However, high-level libraries tend to expose the interfaces to operate a single socket, e.g., read from a socket.
 Then when reading multiple sockets concurrently, we see lots of implementation use threads to achieve
@@ -311,7 +311,7 @@ A conventional and intuitive implementation of a long-run task has the following
 3. Complete the task as successful, canceled, or error.
 
 While such a long-run style is good because of intuitive in many cases, it has the following drawbacks:
-1. Each long-run task occupies an execution capacity from the scheduler, usually a thread. Thus, the capacity of the scheduler limits the task concurrency, and even the tasks are just waiting. As a result, the system throughput is limited.
+1. Each long-run task occupies a worker capacity from the scheduler, usually a thread. Thus, the capacity of the scheduler limits the task concurrency, and even the tasks are just waiting. As a result, the system throughput is limited.
 2. The polling model incurs additional I/O.
 3. It's hard to aggregate inter-system I/O as batches for optimization since distributed tasks could run on different nodes in a cluster.
 
