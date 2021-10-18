@@ -8,6 +8,7 @@
   - [Sequential programming is the origin](#sequential-programming-is-the-origin)
   - [Parallelism and asynchronous model are required](#parallelism-and-asynchronous-model-are-required)
   - [Programming model evolved](#programming-model-evolved)
+- [Parallel Processing Principles](#parallel-processing-principles)
 - [PP-Patterns](#pp-patterns)
   - [1. Batch Stage Chain](#1-batch-stage-chain)
   - [2. Request Aggregator](#2-request-aggregator)
@@ -162,7 +163,19 @@ sensitive service remains unchanged: to identify the cross-boundary heavyweight 
 building blocks to optimize these operations via parallelism or batch, reduce the number of calls, to achieve
 shorter execution time, higher throughput, and lower system cost. 
  
- 
+## Parallel Processing Principles
+
+An engineer makes designs according to experiences, and an architect makes designs according to methodologies.
+
+### 1. Identify unrelated operations at the highest level, and isolate them
+Isolation at the highest level solves the core problem in parallel processing. If architecturally a design is
+sequential, there will be little margin to enhance at the micro-level.
+
+### 2. Favor batch operations
+
+### 3. Plan system scalability limit
+Every system within its lifecycle has a scalability limit. Identifying the limit and design according to it.
+
 ## PP-Patterns
 
 ### 1. Batch Stage Chain
