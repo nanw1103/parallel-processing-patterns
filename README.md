@@ -102,13 +102,13 @@ system, and the execution takes longer. So it comes to multiple technologies for
 
 * Thread: OS-level thread and the programming language side counterpart. Threading retains the
 sequential logic style nicely while supports parallel operations.
-* Callback: describe what to do upon an event
+* Callback: describe what to do upon an event. Programming language runtime takes care of the parallel execution and hides details from developer.
  
 
 Example of parallel execution using threads
 
 
-    Thread 1:
+    Define thread 1:
  
         Make a phone call to R2D2.
 
@@ -116,7 +116,7 @@ Example of parallel execution using threads
 
         Print the translation
    
-    Thread 2:
+    Define thread 2:
 
         Make a phone call to 3-PO.
 
@@ -124,7 +124,7 @@ Example of parallel execution using threads
 
         Print the translation
    
-    Run thread 1 and thread 2 concurrently
+    Run thread 1 and thread 2 in parallel.
 
 
 Example of parallel execution using callbacks
