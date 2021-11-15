@@ -74,17 +74,17 @@ that have the sequential model as native support.
 The following is an example of sequential operations:
 
 
-  First, make a phone call to R2D2.
+    First, make a phone call to R2D2.
 
-  Ask R2D2 to translate an article (which takes some time) and wait for a response.
+    Ask R2D2 to translate an article (which takes some time) and wait for a response.
  
-  Print the translation
+    Print the translation
 
-  Make a phone call to 3-PO.
+    Make a phone call to 3-PO.
 
-  Ask 3-PO to translate an article (which takes some time) and wait for a response.
+    Ask 3-PO to translate an article (which takes some time) and wait for a response.
 
-  Print the translation
+    Print the translation
 
 
 The example is easy to write and understand because the human mind is suitable for this style. The
@@ -108,39 +108,39 @@ sequential logic style nicely while supports parallel operations.
 Example of parallel execution using threads
 
 
-  Thread 1:
+    Thread 1:
  
-    Make a phone call to R2D2.
+        Make a phone call to R2D2.
 
-    Ask R2D2 to translate an article (which takes some time) and wait for a response.
+        Ask R2D2 to translate an article (which takes some time) and wait for a response.
 
-    Print the translation
+        Print the translation
    
-  Thread 2:
+    Thread 2:
 
-    Make a phone call to 3-PO.
+        Make a phone call to 3-PO.
 
-    Ask 3-PO to translate an article (which takes some time) and wait for a response.
+        Ask 3-PO to translate an article (which takes some time) and wait for a response.
 
-    Print the translation
+        Print the translation
    
-  Run thread 1 and thread 2 concurrently
+    Run thread 1 and thread 2 concurrently
 
 
 Example of parallel execution using callbacks
 
 
-   Make a phone call to R2D2.
+    Make a phone call to R2D2.
 
-   Ask R2D2 to translate an article (non-blocking), upon on response do:
+    Ask R2D2 to translate an article (non-blocking), upon on response do:
    
-    Print the translation
+        Print the translation
    
-   Make a phone call to 3-PO.
+    Make a phone call to 3-PO.
 
-   Ask 3-PO to translate an article (non-blocking), upon on response do:
+    Ask 3-PO to translate an article (non-blocking), upon on response do:
 
-    Print the translation
+        Print the translation
 
 
 ### Programming Model Evolved
