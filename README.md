@@ -41,9 +41,7 @@ These patterns are not as common as the GoF Design Patterns but are practical in
 Being aware of these patterns at an early design and implementation phase will
 be beneficial for performance-critical services.
 
-_These patterns are gathered from my development and named per my understanding.
-Others may have already identified some of them with different names. If there's an existing
-reference, please let me know._
+_These patterns are gathered from development practice and named early. Others may have already identified some of them with different names. If there's an existing reference, please create issue or PR in this repo._
 
 Source: [https://github.com/nanw1103/parallel-processing-patterns/blob/main/README.md](https://github.com/nanw1103/parallel-processing-patterns/blob/main/README.md)
 
@@ -165,7 +163,7 @@ building blocks to optimize these operations via parallelism or batch, reduce th
 An engineer makes designs according to experiences, and an architect makes designs according to methodologies.
 
 ### 1. Isolation At The Top
-Identify unrelated operations at the highest level, isolate and process them in parallel. Isolation at the highest level solves the core problem in parallel processing and avoids contention. If a design is sequential architecturally, there will be little margin to enhance at the micro-level.
+Identify unrelated operations at the highest level, isolate and process them in parallel. Isolation at the highest level solves the core problem in parallel processing and avoids contention. If a design is architecturally sequential, there will be little margin to enhance at the micro-level.
 
 ### 2. Favor Batch Operations
 Software engineering is similar to making a castle with building blocks. The feature of your building blocks impacts how you build a castle. Therefore, understand the building blocks and choose the proper ones will be beneficial. In most cases, as building blocks provided by the layers you depend on, batch operations are designed for optimization and will outperform single-resource operations if appropriately used.
