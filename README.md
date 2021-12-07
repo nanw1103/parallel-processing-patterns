@@ -253,11 +253,11 @@ The distributed task, provided by a [task scheduler](https://en.wikipedia.org/wi
 
 ![Conventional Long-run Task](images/sparse-task-conventional-long-run-task.png?raw=true)
 
-While such a long-run style is good because of intuitive in many cases, it has the following drawbacks:
-1. Each long-run task occupies a worker capacity from the scheduler, usually a thread. Thus, the capacity of the scheduler limits the task concurrency, and even the tasks are just waiting. As a result, the system throughput is limited.
+While such a long-run style is good because of intuitivity in many cases, it has the following drawbacks:
+1. Each long-run task occupies a worker capacity from the scheduler, usually a thread. Thus, the capacity of the scheduler limits the task concurrency, even the tasks are just waiting. As a result, the system throughput is limited.
 2. The polling model incurs additional I/O.
 3. It's hard to aggregate inter-system I/O as batches for optimization since distributed tasks could run on different nodes in a cluster.
-4. 
+
 #### Solution
 A sparse task breaks a long-run task into multiple small and independent pieces. It changes the overall structure from a polling model to an event-driven model. Sparse Task pattern consists of the following components:
 1. **Submitter**: Performs the actual task operation and schedules a _timeout monitor task_ on _task scheduler_, per task. The Submitter may or may not be a distributed task, depends on the actual implementation.
