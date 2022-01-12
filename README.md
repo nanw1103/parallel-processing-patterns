@@ -11,7 +11,8 @@
 - [Parallel Processing Principles](#parallel-processing-principles)
   - [1. Isolation At The Top](#1-isolation-at-the-top)
   - [2. Favor Batch Operations](#2-favor-batch-operations)
-  - [3. Plan System Limit](#3-plan-system-limit)
+  - [3. Subsystem Decoupling Over Operation Cascading](#3-subsystem-decoupling-over-operation-cascading)
+  - [4. Plan System Limit](#4-plan-system-limit)
 - [PP-Patterns](#pp-patterns)
   - [1. Batch Stage Chain](#1-batch-stage-chain)
     - [Problem](#problem)
@@ -168,7 +169,10 @@ Identify unrelated operations at the highest level, isolate and process them in 
 ### 2. Favor Batch Operations
 Software engineering is similar to making a castle with building blocks. The feature of your building blocks impacts how you build a castle. Therefore, understand the building blocks and choose the proper ones will be beneficial. In most cases, as building blocks provided by the layers you depend on, batch operations are designed for optimization and will outperform single-resource operations if appropriately used.
 
-### 3. Plan System Limit
+### 3. Subsystem Decoupling Over Operation Cascading
+Operation cascading is a pattern that a downstream operation is triggered directly upon the upstream operation. There are many forms how it exists. For example, on condition A, do operation B, and inside operation B, do operation C. Operation C is a cascaded operation from operation B. Operation cascading has its advantages and suitable scenarios, due to its simplicity and intuitivity. In a complex system, especially subsystems with different processing pace, consider decoupling major subsystems using producer-consumer or mark-and-sweep.
+
+### 4. Plan System Limit
 Every system within its lifecycle has a scalability limit. Identify the limit at the design phase will clear your way to build the system.
 
 ## PP-Patterns
