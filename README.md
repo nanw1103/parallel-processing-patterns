@@ -2,36 +2,40 @@
 
 **Table of contents**
 
-- [Introduction](#introduction)
-- [Consideration on Parallelism and Synchronization](#consideration-on-parallelism-and-synchronization)
-  - [Computer System Fundamentally Supports Parallel Processing](#computer-system-fundamentally-supports-parallel-processing)
-  - [Sequential Programming Is The Origin](#sequential-programming-is-the-origin)
-  - [Parallelism And Asynchronous Model Are Needed](#parallelism-and-asynchronous-model-are-needed)
-  - [Programming Model Evolved](#programming-model-evolved)
-- [Parallel Processing Principles](#parallel-processing-principles)
-  - [1. Isolation At The Top](#1-isolation-at-the-top)
-  - [2. Favor Batch Operations](#2-favor-batch-operations)
-  - [3. Subsystem Decoupling Over Operation Cascading](#3-subsystem-decoupling-over-operation-cascading)
-  - [4. Plan System Limit](#4-plan-system-limit)
-- [PP-Patterns](#pp-patterns)
-  - [1. Batch Stage Chain](#1-batch-stage-chain)
-    - [Problem](#problem)
-    - [Solution](#solution)
-    - [Consequences](#consequences)
-  - [2. Request Aggregator](#2-request-aggregator)
-    - [Problem](#problem-1)
-    - [Solution](#solution-1)
-    - [Consequences](#consequences-1)
-  - [3. Rolling Poller Window](#3-rolling-poller-window)
-    - [Problem](#problem-2)
-    - [Solution](#solution-2)
-    - [Consequences](#consequences-2)
-  - [4. Sparse Task](#4-sparse-task)
-    - [Problem](#problem-3)
-    - [Solution](#solution-3)
-    - [Consequences](#consequences-3)
-  - [5. Ledger](#5-ledger)
-- [Epilogue](#epilogue)
+- [Parallel Processing Patterns (PP-Patterns)](#parallel-processing-patterns-pp-patterns)
+  - [Introduction](#introduction)
+  - [Consideration on Parallelism and Synchronization](#consideration-on-parallelism-and-synchronization)
+    - [Computer System Fundamentally Supports Parallel Processing](#computer-system-fundamentally-supports-parallel-processing)
+    - [Sequential Programming Is The Origin](#sequential-programming-is-the-origin)
+    - [Parallelism And Asynchronous Model Are Needed](#parallelism-and-asynchronous-model-are-needed)
+    - [Programming Model Evolved](#programming-model-evolved)
+  - [Parallel Processing Principles](#parallel-processing-principles)
+    - [1. Isolation At The Top](#1-isolation-at-the-top)
+    - [2. Favor Batch Operations](#2-favor-batch-operations)
+    - [3. Subsystem Decoupling Over Operation Cascading](#3-subsystem-decoupling-over-operation-cascading)
+    - [4. Plan System Limit](#4-plan-system-limit)
+  - [PP-Patterns](#pp-patterns)
+    - [1. Batch Stage Chain](#1-batch-stage-chain)
+      - [Problem](#problem)
+      - [Solution](#solution)
+      - [Consequences](#consequences)
+    - [2. Request Aggregator](#2-request-aggregator)
+      - [Problem](#problem-1)
+      - [Solution](#solution-1)
+      - [Consequences](#consequences-1)
+    - [3. Rolling Poller Window](#3-rolling-poller-window)
+      - [Problem](#problem-2)
+      - [Solution](#solution-2)
+      - [Consequences](#consequences-2)
+    - [4. Sparse Task](#4-sparse-task)
+      - [Problem](#problem-3)
+      - [Solution](#solution-3)
+      - [Consequences](#consequences-3)
+    - [5. Marker and Sweeper](#5-marker-and-sweeper)
+      - [Problem](#problem-4)
+      - [Solution](#solution-4)
+      - [Consequences](#consequences-4)
+  - [Epilogue](#epilogue)
 
 ## Introduction
 While developing services, with scalability, throughput, and performance as significant concerns,
@@ -286,8 +290,38 @@ This pattern relies on a callback to notify the event handler about task complet
 
 The Sparse Task pattern depends on a distributed scheduler to monitor task timeout. One timeout task is associated with one logical long-run task. This model handles each task individually. An alternative is to manage a large number of items in batches. The following Ledger pattern covers that.
 
-### 5. Ledger
-WIP
+
+### 5. Marker and Sweeper
+
+#### Problem
+
+In some systems, there are triggers. Upon a trigger, a certain operation or processing is needed, normally on a specific target. E.g. an event driven system with
+an cleanup event to indicate "cleanup needed in room1". A straightforward approach is, upon the event, perform
+the operation in place. In many cases, this is a good approach, due to its simplicity, but in complex cases, 
+challenges arise. For example:
+1. The event peak speed is higher than that the processing part can handle.
+2. The processing of the target needn't to be duplicated. React on each event leads to unnecessary duplicated operation.
+3. The processing could trigger another event, which leads to another operation, and so on. This could make the system hard to control when it grows big. 
+
+Especially 3#, let's name it as _Operation Cascading_, which is something we tried hard to avoid in a complex system.
+
+#### Solution
+
+The Marker and Sweeper pattern separates the part of the system that requests the changes, and the part of the system that
+handles the changes. There are three concepts:
+1. **The marker**: upon requests, mark the related target in the flag set.
+2. **The flag set**: A state which keeps track of targets to be processed.
+3. **The sweeper**: Consumes the flag set and process targets accordingly.
+
+
+The Marker and Sweeper is similar to the Producer and Consumer pattern.
+
+#### Consequences
+1. Decouple of the requestor part, and the handler part.
+2. The requestor part (marker) and the handler part (sweeper) can work at their own pace, and can be scaled separately.
+3. Due to the lightweight of the flag set, the marker may work with high throughput.
+4. Due to the set-manner of the flag set, the marker is ideal for deduplication.
+5. The handler part (sweeper) has the chance to process items in batch manner.
 
 ## Epilogue
 The pattern abstraction comes from practice, and it applies back to practice. This process sometimes makes me rethink the way we create software. There's no best pattern for each problem, but there should be a good fit in each context. What actually guide our designs and patterns, are the principles behind, which we summarized from a variety of practices. It's the principles that we'd stick to. Maybe one day in the future, when we look back upon our career, the only thing to stick to is [Doctrine of the Mean](https://en.wikipedia.org/wiki/Doctrine_of_the_Mean).
