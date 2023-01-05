@@ -35,6 +35,10 @@
       - [Problem](#problem-4)
       - [Solution](#solution-4)
       - [Consequences](#consequences-4)
+    - [6. API Quota Awareness and Speedometer](#6-api-quota-awareness-and-speedometer)
+      - [Problem](#problem-5)
+      - [Solution](#solution-5)
+      - [Consequences](#consequences-5)
   - [Epilogue](#epilogue)
 
 ## Introduction
@@ -322,6 +326,45 @@ The Marker and Sweeper is similar to the Producer and Consumer pattern.
 3. Due to the lightweight of the flag set, the marker may work with high throughput.
 4. Due to the set-manner of the flag set, the marker is ideal for deduplication.
 5. The handler part (sweeper) has the chance to process items in batch manner.
+
+
+### 6. API Quota Awareness and Speedometer
+
+#### Problem
+
+In some systems (Cloud provider services), There exists a throttling limit for each request (as known as the API quota limit. e.g. [Azure Throttling Resource Manager requests](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/request-limits-and-throttling))
+which is a limitation for high throughput of the target service. Any REST request to the cloud provider service will consume this quota. When hitting this rate limit, unepxeceted response will be returned such as 
+[http response code 429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429), and no more same type of request will be accepted by the cloud provider service. This throttling limit quota will recover as time goes by. 
+Hence the Speedometer is proposed to dynamically detect whether the cloud provider is about to hit the limit and do service side throttling control to avoid any 429 response by the cloud provider service and make the most of both sides.
+
+Challenges:
+1. API request need to know the current cloud provider service remain quota limit.
+2. The quota limit could not be obtained from any of the exising API calls. Only from a same type of API call response can we know the current quota limit.
+3. Throttle control is needed when quota limit is about to be used up.
+4. Throttle control needs to turn off when quota is back.
+
+Below is an example for how Azure quota limit behaves for VM creating and deleting at the same time.
+
+Test scenario: 3 providers were created with 3 different Azure service principles. Each provider submits one Windows VM deployment every minute. The VM is deleted once the deployment is finished. The corresponding Azure rate limit value is recorded as follows:
+![Azure quota limit changes for write and delete](images/azure-quota-limit-change-for-write-and-delete.png?raw=true)
+
+#### Solution
+
+API Quota Awareness and Speedometer pattern separates the part of the system that requests the changes, and the part of the system that
+handles the changes. There are three concepts:
+1. In RAM type to quota cache. This cache keeps a record of the latest last returned quota limit. Every response from the cloud provider service will update the cache automatically.
+2. Passive probe throttle control service. This service will benefit from the in RAM cache and before every request sent to the cloud provider service, it helps anwser the service if a delay is needed. There are following scenarios:
+   1. If first time probe, no delay is needed, init the cache.
+   2. If the quota left is less than 10% of the max quota, return the required delay time. After one round of the delay time, 1 request will be leaked to probe the latest quota munber and update the quota. If the quota is back to normal, no delay will be needed for other requests. Or else other requests needs to keep waiting until the quota is back.
+   3. If the quota expires, all request will be blocked for a short time wait. 1 request will be leaked to update the quota. After quota is updated, all requests are free to go.
+
+![Speedometer architecture](images/speedometer-architecture.png)
+
+
+#### Consequences
+1. Service makes the most of cloud provider service quota limit and keeps high throughput.
+2. Service to webclient interceptor level passive throttle control achieved.
+3. Service try its best to prevent insufficient quota. Even if it fails, proper error messages will be populated to the uppder layer and handled by the service.
 
 ## Epilogue
 The pattern abstraction comes from practice, and it applies back to practice. This process sometimes makes me rethink the way we create software. There's no best pattern for each problem, but there should be a good fit in each context. What actually guide our designs and patterns, are the principles behind, which we summarized from a variety of practices. It's the principles that we'd stick to. Maybe one day in the future, when we look back upon our career, the only thing to stick to is [Doctrine of the Mean](https://en.wikipedia.org/wiki/Doctrine_of_the_Mean).
