@@ -4,7 +4,7 @@
 
 - [Parallel Processing Patterns (PP-Patterns)](#parallel-processing-patterns-pp-patterns)
   - [Introduction](#introduction)
-  - [Consideration on Parallelism and Synchronization](#consideration-on-parallelism-and-synchronization)
+  - [Consideration of Parallelism and Synchronization](#consideration-of-parallelism-and-synchronization)
     - [Computer System Fundamentally Supports Parallel Processing](#computer-system-fundamentally-supports-parallel-processing)
     - [Sequential Programming Is The Origin](#sequential-programming-is-the-origin)
     - [Parallelism And Asynchronous Model Are Needed](#parallelism-and-asynchronous-model-are-needed)
@@ -35,6 +35,7 @@
       - [Problem](#problem-4)
       - [Solution](#solution-4)
       - [Consequences](#consequences-4)
+      - [Examples](#examples)
   - [Epilogue](#epilogue)
 
 ## Introduction
@@ -294,13 +295,11 @@ The Sparse Task pattern depends on a distributed scheduler to monitor task timeo
 
 #### Problem
 
-In some systems, there are triggers. A certain operation or processing is needed upon a trigger, normally on a specific target. E.g., an event-driven system with
+In some systems, there are triggers or events, and certain operation or processing is needed upon a trigger, normally on a specific target. E.g., an event-driven system with
 a cleanup event to indicate "cleanup needed in room1". A straightforward approach is, upon the event, to operate in place. This is a good approach in many cases due to its simplicity, but challenges arise in complex cases. For example:
-1. The event peak speed is higher than the processing part's handle.
+1. The event peak speed is higher than that the processing part can handle.
 2. The processing of the target needs to be unique. React on each event leads to unnecessary duplicated operations.
-3. The processing could trigger another event, which leads to another operation, and so on. This could make the system hard to control when it grows big. 
-
-Especially 3#, let's name it _Operation Cascading_, which we tried hard to avoid in a complex system.
+3. _Event Cascading_: The processing could trigger another event, which leads to another operation, and so on. This could make the system hard to control when it grows big. 
 
 #### Solution
 
@@ -310,8 +309,11 @@ handles the changes. There are three concepts:
 2. **The flag set**: A state which keeps track of targets to be processed.
 3. **The sweeper**: Consumes the flag set and process targets accordingly.
 
+![Marker and Sweeper](images/marker-and-sweeper.png)
+
 
 The Marker and Sweeper pattern is similar to the Producer and Consumer pattern.
+
 
 #### Consequences
 1. Decouple the requestor part and the handler part.
@@ -319,6 +321,9 @@ The Marker and Sweeper pattern is similar to the Producer and Consumer pattern.
 3. Due to the lightweight of the flag set, the marker may work with high throughput.
 4. Due to the set manner of the flag set, the marker is ideal for deduplication.
 5. The handler part (sweeper) has the chance to process items in a batch manner.
+
+#### Examples
+Typical examples are the network socket _select_ API, and Linux epoll, etc.
 
 ## Epilogue
 Pattern abstraction comes from practice, and it applies back to practice. This process sometimes makes me rethink the way we create software. There's no best pattern for each problem, but there should be a good fit in each context. What guides our designs and patterns are the principles behind them, which we summarized from various practices. It's the principles that we'd stick to. Maybe one day in the future, when we look back upon our career, the only thing to stick to is [Doctrine of the Mean](https://en.wikipedia.org/wiki/Doctrine_of_the_Mean).
