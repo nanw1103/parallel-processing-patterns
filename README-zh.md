@@ -1,324 +1,312 @@
-# Parallel Processing Patterns (PP-Patterns)
+# 并发模式
 
-**Table of contents**
+- [并发模式](#并发模式)
+  - [引言](#引言)
+  - [并行性和同步性的思考](#并行性和同步性的思考)
+    - [计算机系统中并行处理的基本原理](#计算机系统中并行处理的基本原理)
+    - [顺序编程的起源](#顺序编程的起源)
+    - [并行性和异步模型的需求](#并行性和异步模型的需求)
+    - [编程模型的演进](#编程模型的演进)
+  - [并行处理原则](#并行处理原则)
+    - [1. 从顶部实施隔离](#1-从顶部实施隔离)
+    - [2. 偏好批量操作](#2-偏好批量操作)
+    - [3. 子系统解耦而非操作级联](#3-子系统解耦而非操作级联)
+    - [4. 规划系统限制](#4-规划系统限制)
+  - [并发模式](#并发模式-1)
+    - [1. 批处理阶段链](#1-批处理阶段链)
+      - [问题](#问题)
+      - [解决方案](#解决方案)
+      - [结果](#结果)
+    - [2. 请求聚合器](#2-请求聚合器)
+      - [问题](#问题-1)
+      - [解决方案](#解决方案-1)
+      - [结果](#结果-1)
+    - [3. 滚动轮询窗口](#3-滚动轮询窗口)
+      - [问题](#问题-2)
+      - [解决方案](#解决方案-2)
+      - [结果](#结果-2)
+    - [4. 稀疏任务](#4-稀疏任务)
+      - [问题](#问题-3)
+      - [解决方案](#解决方案-3)
+      - [结果](#结果-3)
+    - [5. 标记者和擦除着者](#5-标记者和擦除着者)
+      - [问题](#问题-4)
+      - [解决方案](#解决方案-4)
+      - [结果](#结果-4)
+      - [例子](#例子)
+  - [后记](#后记)
 
-- [Introduction](#introduction)
-- [Consideration on Parallel Style and Synchronization Models](#consideration-on-parallel-style-and-synchronization-models)
-  - [Computer system fundamentally supports concurrent execution](#computer-system-fundamentally-supports-concurrent-execution)
-  - [Sequential programming is the origin](#sequential-programming-is-the-origin)
-  - [Parallelism and asynchronous model are required](#parallelism-and-asynchronous-model-are-required)
-  - [Programming model evolved](#programming-model-evolved)
-- [PP-Patterns](#pp-patterns)
-  - [1. Batch Stage Chain](#1-batch-stage-chain)
-  - [2. Request Aggregator](#2-request-aggregator)
-  - [3. Rolling Poller Window](#3-rolling-poller-window)
-  - [4. Sparse Task](#4-sparse-task)
-  - [5. Ledger](#5-ledger)
+## 引言
+在开发服务的过程中，以可扩展性、吞吐量和性能为主要关注点，经常会出现一系列与并行处理领域有关的重复挑战。这些挑战通过具体的解决方案得以应对，我们将其归类为模式。这些模式的核心焦点主要围绕着并发操作、并行处理、节流控制以及对 I/O 敏感的操作。
 
-## Introduction
-While developing services, with scalability, throughput, and performance as significant concerns,
-some common problems in parallel processing emerge. The solution for
-each situation is shareable, so I'm summarizing them as patterns. The target problems are mostly concurrent operations, parallel processing, throttle control, and I/O sensitive operations.
+尽管这些模式可能没有像著名的"四人帮"（GoF）设计模式那样普遍，但它们在不同场景中具有实际的重要价值。在设计和实施的早期阶段熟悉这些模式可以为需要高性能的服务带来显著的好处。
 
-These patterns are not as common as the GoF Design Patterns but are practical in specific scenarios. 
-Being aware of these patterns at an early design and implementation phase will
-be beneficial for performance-critical services.
-
-_These patterns are gathered from my development and named per my understanding.
-Others may have already identified some of them with different names. If there's an existing
-reference, please let me know._
-
-This list is a work in progress.
-
-## Consideration on Parallel Style and Synchronization Models
-
-### Computer system fundamentally supports concurrent execution
-The modern computer system typically adopts the interrupt mechanism for I/O. Upon signal, it triggers the
-CPU to suspend the current path and execute a different one. Though the per-CPU execution is
-still sequential at the micro-level, the execution model exposed is logically parallel. Considering multiple
-CPUs and cores, a computer system fundamentally supports concurrent execution and is suitable for the
-asynchronous model.
-
-However, such an asynchronous model is not intuitive to the human mind, which is more
-comfortable with _sequential operations_. It's also non-intuitive to write synchronous routines down.
-
-### Sequential programming is the origin
-One could debate whether programming is for the computer to execute or for humans to write and read.
-If we look back upon the evolution of programming languages, we can see that in the last 60 years,
-programming languages are evolving from computer-friendly (punched card) to human-friendly (assembly,
-C++, Python). The programming languages aims to optimize for human: make read and write easier. The
-computer-oriented optimization is taken care of by the compiler, programming model by each language, and OS
-stacks.
-
-So human-friendly is a key for programming languages, and sequential operation is easy to understand and write down. 
-Most high-level programming languages today are _concurrent programming languages_,
-that has a sequential model as native support.  
-
-The following is an example of sequential operations:
+_值得注意的是，这些模式是从真实的开发经验中提炼出来的，并且在开发的早期阶段命名。完全有可能其他人已经用不同的名称识别出了类似的模式。如果您找到现有的参考资料，我们鼓励您通过在[本存储库](https://github.com/nanw1103/parallel-processing-patterns/blob/main/README-zh.md)中创建问题或拉取请求来做出贡献。_
 
 
-  First, make a phone call to R2D2.
+## 并行性和同步性的思考
 
-  Ask R2D2 to translate an article (which takes some time) and wait for a response.
-  
-  Print the translation
+### 计算机系统中并行处理的基本原理
+在现代计算机系统领域，采用中断机制进行 I/O 是一种常见的实践。当接收到信号时，它促使 CPU 暂时中止当前任务并切换到另一个任务。尽管微观层面的执行仍然是顺序的，但所暴露的执行模型在逻辑上呈现出并行性。随着多个 CPU 和核心的存在，计算机系统本质上支持并行执行，使其非常适合异步模型。
 
-  Make a phone call to 3-PO.
+然而，这种异步模型可能与人类思维的直观本质不符，人类更倾向于"_"顺序操作"。因此，需要更加用户友好的方法来编写同步例程。
 
-  Ask 3-PO to translate an article (which takes some time) and wait for a response.
+### 顺序编程的起源
 
-  Print the translation
+编程的本质在于计算机执行和人类理解的交汇点。在过去的六十年里，编程语言经历了重大变革，从以计算机为中心（穿孔卡片）发展为以人为中心（汇编、C++、Python）。这些语言的主要目标是优化人类的体验，使代码更具可读性和可编写性。语言编译器处理与计算机相关的优化细节，而每种语言提供了独特的编程模型和与操作系统栈的接口。
 
+强调人性友好性是编程语言的一个特点，顺序操作的概念在本质上直观且易于表达。在当今，大多数高级编程语言被认为是“并发编程语言”，具有本地支持顺序模型的能力。
 
-The example is easy to write and understand because the human mind is suitable for this style. The
-tasks (translation process) run on separate systems (the robots) and are logically parallel from the
-run of the main logic above. However, we model the process in many cases, as shown above, because
-it has an undeniable advantage: it is easy to create and read for humans. The critical point in achieving this
-is that the parallel execution is converted to a blocking operation: "ask and wait". This style is commonly
-adopted, at the OS level, in libraries, and at application layers. And this blocking style is typically
-supported natively by many programming languages, C, Java, Python, etc.
+让我们通过一个简单的顺序操作示例来说明：
+```
+1. 打电话给 R2D2。
+2. 要求 R2D2翻译一篇文章（耗时的任务）并等待响应。
+3. 打印翻译。
+4. 给 3-PO 打电话。
+5. 要求 3-PO翻译一篇文章（耗时的任务）并等待响应。
+6. 打印翻译。
+```
 
-### Parallelism and asynchronous model are required
+这个示例很容易编写和理解，因为它与人类的自然思维方式相吻合。尽管任务（翻译过程）在不同的系统（机器人）上运行，但它们在逻辑上与上面的主要逻辑是并行的。在许多情况下，这种风格受欢迎，因为它具有不可否认的优势：它易于由人类创建和理解。实现这一点的关键在于将并行执行转化为阻塞操作，使用“询问和等待”的方式。这种风格通常在各个层面上得到采纳，从操作系统到库和应用程序层。值得注意的是，包括C、Java和Python在内的许多编程语言本地支持这种阻塞风格。
 
-The cost of sequential operation is obvious: we are not utilizing the parallelism and asynchronous capability provided by the
-system, and the execution takes longer. Then it comes to multiple technologies for this:
+### 并行性和异步模型的需求
 
-* Thread: OS-level thread and the programming language side counterpart. Threading retains the
-sequential logic style nicely while supports parallel operations.
-* Callback: describe what to do upon an event
+当我们考虑利用现代计算系统提供的并行性和异步能力时，顺序操作的缺点变得明显。顺序执行通常会导致处理时间更长。为了解决这一挑战，出现了各种技术：
+
+**线程**：线程存在于操作系统级别，并作为编程语言中的对应部分。线程允许我们保持顺序逻辑风格，同时实现并行操作。
+
+**回调**：回调描述了在特定事件发生时要采取的操作。编程语言运行时处理并行执行并保护开发人员免受许多实现细节的干扰。
+
+让我们探讨如何使用线程和回调进行并行执行的示例：
+
+使用线程进行并行执行的示例：
+
+```
+定义线程 1：
  
+    给 R2D2 打电话。
 
-Example of parallel execution using threads
+    要求 R2D2翻译一篇文章（需要一些时间）并等待响应。
 
-
-  Thread 1:
-  
-    Make a phone call to R2D2.
-
-    Ask R2D2 to translate an article (which takes some time) and wait for a response.
-
-    Print the translation
-    
-  Thread 2:
-
-    Make a phone call to 3-PO.
-
-    Ask 3-PO to translate an article (which takes some time) and wait for a response.
-
-    Print the translation
-    
-  Run thread 1 and thread 2 concurrently
-
-
-Example of parallel execution using callbacks
-
-
-   Make a phone call to R2D2.
-
-   Ask R2D2 to translate an article (non-blocking), upon on response do:
+    打印翻译
    
-    Print the translation
-    
-   Make a phone call to 3-PO.
+定义线程 2：
 
-   Ask 3-PO to translate an article (non-blocking), upon on response do:
+    给 3-PO 打电话。
 
-    Print the translation
+    要求3-PO翻译一篇文章（需要一些时间）并等待响应。
 
+    打印翻译
+   
+并行运行线程 1 和线程 2。
+```
 
-### Programming model evolved
+使用回调进行并行执行的示例：
+```
+给 R2D2 打电话。
 
-One interesting observation I had is about the asynchronous patterns as first-class support in programming
-languages. However, before talking about that, let's look back upon the sequential programming model:
-threading.
+要求R2D2翻译一篇文章（非阻塞）。在收到响应后，执行以下操作：
 
-The threading model has its advantages derived from OS native implementation. It helps to describe the steps to
-complete a task sequentially. That is due to the synchronous nature:
-synchronous operations are easier to describe and understand. But when asynchronous is the central theme,
-the sequential model is hard to optimize. The model provided by programming languages causes such difficulties. 
-You may think, is there a different model that can describe asynchronous problems easier?
-Then genius invented asynchronous-native languages, like JavaScript, which do everything asynchronously by
-default. The runtime handles the asynchronous operation to lower-level calls (OS, I/O), hiding the
-complexity from programmers. As a result, such languages are fluent in describing asynchronous tasks.
+    打印翻译
+   
+给 3-PO 打电话。
 
-Examples of sequential-native languages are C++, Java, and Python. By their nature, it's easy to describe
-sequential problems.
-Examples of asynchronous-native languages are the JavaScript family (CoffeeScript, TypeScript). By their nature,
-it's easy to describe a parallel routine.
+要求3-PO翻译一篇文章（非阻塞）。在收到响应后，执行以下操作：
 
-The exciting thing is, for these two styles, none of them dominates. Later, sequential-native languages
-added features to support describing asynchronously by introducing concepts like Future in Java
-and C++, _async_ and _await_ in C#, Rx framework, etc. These are easy to achieve in asynchronous-native
-languages like JavaScript. While JavaScript also introduced _await_ later to improve the capability to
-describe sequential operations.
+    打印翻译
+```
 
-There are other models and concepts which fundamentally simplify how parallelism problems are described or
-concurrency achieved. For example, Java Executor, Java Parallel Streaming, Erlang messaging,
-Golang channel, Golang goroutine. Developers see fewer unnecessary details, and the models
-and concepts are better in abstraction for describing common problems.
+### 编程模型的演进
+观察编程语言的发展历程，尤其是异步模式作为一流特性的出现，令人着迷。在深入讨论这个主题之前，让我们重新审视传统的顺序编程模型，即线程。
 
-No matter how the building block evolves, one of the core problems to solve for I/O centric and performance
-sensitive service remains unchanged: to identify the cross-boundary heavyweight operations, utilize the
-building blocks to optimize these operations via parallelism or batch, reduce the number of calls, to achieve
-shorter execution time, higher throughput, and lower system cost. 
+线程有其优点，源自操作系统提供的本地支持。它擅长描述一步一步的任务完成，因为它是同步的。顺序操作天生更容易表达和理解。然而，当异步编程占据中心舞台时，由于编程语言的固有特性，顺序模型面临挑战。是否存在一种替代模型，可以更简单地描述异步任务？聪明的解决方案以异步本地语言的形式出现，比如JavaScript，其中几乎一切都默认是异步的。运行时负责在较低层次（如操作系统和I/O）处理异步操作，从程序员那里有效地屏蔽了复杂性。因此，这些语言擅长以流畅的方式表达异步任务。
+
+顺序本地语言的示例包括C++、Java和Python，它们在自然描述顺序问题方面表现出色。
+
+另一方面，异步本地语言，如JavaScript系列中的语言（包括CoffeeScript和TypeScript），擅长表达并行例程。
+
+有趣的是，这两种风格都没有在编程领域占据主导地位。顺序本地语言后来引入了一些功能，以促进描述异步任务，包括Java和C#中的Future概念，以及C#中的async和await，以及Rx框架。这些功能在异步本地语言（如JavaScript）中相对容易实现，后来还引入了await以增强描述顺序操作的能力。
+
+还存在其他模型和概念，从根本上简化了并行问题的描述和并发性的实现。示例包括Java Executors、Java Parallel Streaming、Erlang消息传递、Go语言通道和Go goroutines。这些模型和概念抽象掉了不必要的细节，使其非常适合描述常见问题。
+
+然而，无论这些构建块如何演化，对于以I/O为中心且对性能敏感的服务，一个核心问题保持不变：识别跨边界的重型操作。通过利用这些构建块来通过并行处理或批处理来优化操作，减少调用数量，最终可以实现更短的执行时间、更高的吞吐量和降低的系统成本。
  
- 
-## PP-Patterns
+## 并行处理原则
 
-### 1. Batch Stage Chain
+_工程师根据经验进行实践，架构师依赖方法论进行设计。_
 
-_Fine granular parallel execution based on stages, for better parallelism._
+### 1. 从顶部实施隔离
+在最高层识别不相关的操作并将它们分离处理。这种方法解决了并行处理中的核心问题，并减轻了争用。从架构上看，顺序设计在微观层面提供了有限的优化空间。
 
-#### Problem
-Traditional programming languages, functional programming, object-oriented programming, and school
-education usually leads people to write programs as function units from the beginning.
-That's usually a good practice for implementing sequential scenarios: a self-contained function unit.
+### 2. 偏好批量操作
+软件工程类似于用各种构建块建造城堡。选择构建块的方式会显著影响城堡的建造方式。了解这些构建块的特性并选择合适的构建块至关重要。在许多情况下，依赖的各层提供的批量操作旨在进行优化，并在正确使用时通常优于单一资源操作。
+
+### 3. 子系统解耦而非操作级联
+操作级联涉及在上游操作完成后直接触发下游操作。虽然操作级联具有其优点并且很直观，但在复杂系统中，特别是具有不同处理速度的子系统中，可能会导致问题。一个重要问题是系统吞吐量可能受到最慢点的限制，使适当的扩展变得困难。
+
+相反，系统解耦将系统拆分为多个阶段，允许每个阶段具有特定的扩展目标进行设计和优化。这导致与操作级联相比更复杂的设计和实施。相关模式包括生产者-消费者、批处理阶段链和标记和清除。
+
+### 4. 规划系统限制
+每个系统在其生命周期内都有可伸缩性限制。在设计阶段识别这个限制为建立系统铺平了道路。
+
+## 并发模式
+
+### 1. 批处理阶段链
+
+_基于阶段的精细颗粒并行执行，以提高并行性。_
+
+#### 问题
+传统编程范式，包括传统编程语言、函数式编程和面向对象编程，通常鼓励开发人员从一开始就将程序编写为独立的函数单元。这种做法通常适用于实施顺序情况，其中每个函数单元都是独立运行的。
+
 
 ![self-contained unit](images/self-contained-unit.png?raw=true)
 
-When parallelism is needed, a natural process is to reuse the existing function unit as a building block
-and run it parallel to achieve speed and performance. Such a straightforward approach usually
-works well at the beginning. Let's call this pattern "Parallel Sequential Units".
+当并行性成为要求时，自然的倾向是重用这些现有的函数单元作为构建块，并将它们并行执行以提高速度和性能。这种直接的方法通常在初始阶段效果良好，我们可以称之为"并行顺序单元"模式。
+
 
 ![Parallel Sequential Units](images/parallel-sequential-units.png?raw=true)
 
+然而，在处理复杂的序列时，特别是涉及多个重量级操作（例如I/O或跨服务调用）时，将函数单元并行运行可能并不是最优选择，原因有两点：
 
-However, when the sequence is complex, especially multiple heavyweight operations (I/O or inter-service calls)
-are involved, parallel run of the function unit is not optimal in most cases. Because of two factors:
-1. Normally, there are more efficient ways to do batch I/O or inter-service calls. Batch calls are usually
-better and more effective.
-2. Heavyweight operations could have a concurrency limit or API quota limit. The parallel execution of the existing
-unit, logically doing the same procedure concurrently, could either exceed the heavyweight operation limit (if
-the parallel number is high) or not fully utilize the concurrency capability (if the parallelism number is low). 
+1. 批量I/O或跨服务调用通常存在更高效的方法。批处理操作通常更为有效。
+2. 重量级操作可能具有固有的并发限制或API配额限制。并行执行现有单元，同时执行基本上相同的过程，可能会超出限制（如果并行度较高）或未充分利用并发能力（如果并行度较低）。
 
-#### Solution
-The solution for such a problem is to break the sequential operation into multiple stages. Heavyweight operations
-can be done in a batch manner or be properly handled the concurrency within each stage. In ideal cases, batch operation
-optimizes the process, and concurrency happens at this level. The producer-consumer
-pattern chains together the stages. The output of the previous stage feeds as the input of the
-next stage in the chain. Let's call this pattern "Batch Stage Chain". Such a pattern, in many cases, has better
-performance than the Parallel Sequential Units pattern at the cost of non-intuitive implementation.
+
+#### 解决方案
+解决这个问题的方法涉及将顺序操作分解为多个阶段。重量级操作可以以批处理方式进行管理，或者可以在每个阶段的并发性内得到充分处理。在理想情况下，批处理操作在处理层面进行了优化，而并发性在这个阶段发生。生产者-消费者模式将这些阶段连接在一个链中，一个阶段的输出作为下一个阶段的输入。我们可以将这种模式称为"批处理阶段链"。在许多情况下，尽管实现相对不够直观，但这种模式在性能方面优于并行顺序单元。
+
 
 ![Batch Stage Chain](images/batch-stage-chain.png?raw=true)
 
-#### Consequences
-* Since multiple calls of the same operation are handled together in a stage. Each stage adopts optimization natively.
-It enables the possibility to achieve better concurrency and performance.
-* The solution is non-intuitive than Parallel Sequential Units. 
+#### 结果
+* 由于将相同操作的多次调用组合到一个阶段中，每个阶段可以自然地应用优化，从而有可能实现更高的并发性和性能。
+* 与并行顺序单元相比，该解决方案的实现更复杂。
 
 
-### 2. Request Aggregator
-_Aggregate requests and perform in a batch manner while keeping the simple style for callers._
 
-#### Problem
-Working with a single resource usually is more straightforward than working with multiple resources at the same time. 
-Single-resource operation is easy to understand, easy to design, and easy to implement: in general, more human-mind friendly.
-Exposing a single-resource operation interface is a typical style chosen by software systems and libraries.
-For example, in a book store management system, the interface to get a single book versus the interface to get
-multiple books.
+### 2. 请求聚合器
 
-Due to the layering in software design, such a single-resource operation interface style is inherited and spread to
-multiple layers and related systems.
+_将请求聚合并批量执行，同时保持调用者的简单接口。_
 
-In such a context, when an operation on multiple resources is needed, the software layering and existing
-interfaces may leave developers no choice but to stick to the single-resource interface. For example, a
-third-party cloud service exposes only single-resource operation, and it's out of our control.
+#### 问题
+通常，处理单一资源比同时处理多个资源更为简单。单一资源操作易于理解、设计和实现，因此更加用户友好。软件系统和库通常选择单一资源操作接口样式，例如在书店管理系统中提供获取单本书和获取多本书的接口。
 
-When operating on multiple resources, making concurrent calls using the single
-resource operation is natural for performance-related scenarios. The rationale is similar to the aforementioned
-self-contained function unit in a previous section. Such an approach has lots of advantages in practice,
-and in many cases, maybe the best choice.
+由于软件设计的分层结构，这种单一资源操作接口样式渗透到多个层次和相关系统中。
 
-However, when additional performance is needed, it will be hard.
+在这种情况下，当需要对多个资源执行操作时，现有的软件分层和接口可能会限制开发人员使用单一资源接口。例如，第三方云服务可能只暴露单一资源操作，这可能超出我们的控制。
 
-One example is the network socket I/O library provided by OS. The socket presentation and operation are handled as
-a batch at the OS level, reflecting the underlying hardware. Examples are Linux epoll and Windows completion
-port. However, high-level libraries tend to expose the interfaces to operate a single socket, e.g., read from a socket.
-Then when reading multiple sockets concurrently, we see lots of implementation use threads to achieve
-concurrent operations. One of the advantages of this style is easy-to-read: it's still a
-single socket operated in some sequence for the function unit. But the layers under the API are either not optimized
-or require good design and implementation to achieve the easy-to-use single-resource interface while not losing
-the batch operation advantages.
+对于性能相关的情况，使用单一资源操作进行并发调用是一个自然选择。其理念类似于前一部分讨论的自包含函数单元。这种方法具有许多实际优势，通常是最佳选择。
 
-#### Solution
+但是，当需要更高的性能时，它可能会变得繁重。
 
-The aggregator pattern aims to preserve the easy-to-use single-resource operation interfaces while utilizing
-batch operations to optimize cross-system calls, which are typically heavy.
+例如，考虑操作系统提供的网络套接字I/O库。操作系统通常将套接字呈现和操作作为批处理来管理，以与底层硬件能力保持一致（例如Linux epoll和Windows完成端口）。然而，高级库往往会提供单一套接字操作的接口，如从套接字读取。当需要对多个套接字进行并发操作时，许多实现都会使用线程。这种方法保留了在某种顺序中执行函数单元时操作单一套接字的简单性，但它要求在API下面的层面进行优化，或者需要精心设计和实现，以保持用户友好的单一资源接口，而不牺牲批处理操作的优势。
+
+
+#### 解决方案
+聚合器模式旨在保持用户友好的单一资源操作接口，同时利用批量操作来优化跨系统的调用，特别是涉及到大量处理的情况。
+
 
 ![Request Aggregator](images/request-aggregator.png?raw=true)
 
-#### Consequences
-The single-resource operation interface is reserved, while batch operation can be applied to optimize cross-system
-heavy calls. With careful design, the number of cross-system calls is less.
+#### 结果
+单一资源操作接口保持不变，同时使用批量操作来提高跨系统重型调用的效率。通过精心设计，可以减少跨系统调用的数量。
 
-### 3. Rolling Poller Window
-_Poll states for a large number of items with controlled batches._
+### 3. 滚动轮询窗口
 
-#### Problem
-When polling a large number of items, sometimes it may not be possible to poll them all together, and
-polling items one by one usually is inefficient.
-So it is needed to divide the operation into small batches to meet the target service requirements. For example,
-batch size limit, response size limit, quota limit of the number of API calls, etc.
+_以控制批次轮询大量项目的状态。_
 
-#### Solution
-In the array of the target items, a rolling window indicates the targets to poll. The target system requirement or
-optimization determines the window size. In each turn, only the items in the poller
-window are polled from the target system, ideally as a single batch. The result is cached locally. The poller window
-moves on inside the array until it reaches the end. Then the items are reorganized, either in the array or
-using separate data structures. So that only the unfinished items remain in the array as the polling target.
-The rolling window continues. This process continues until all items reach to desired completion state.
+#### 问题
+在轮询大量项目时，一次性轮询它们可能不可行，而单独轮询它们通常效率低下。因此，需要将操作分成更小的批次，以符合服务要求，如批处理大小限制、响应大小限制和API调用配额。
+
+
+#### 解决方案
+滚动窗口的概念用于确定在目标项目数组中应轮询的目标。窗口大小由目标系统的要求或优化标准确定。在每次迭代中，只有轮询窗口内的项目才从目标系统中轮询，理想情况下是一次性批处理。结果被本地缓存。轮询窗口在数组内移动，直到达到末尾。随后，数组中的项目被重新组织，可以在数组内或使用单独的数据结构，以便只有未完成的项目保留作为轮询目标。然后滚动窗口继续。此过程重复，直到所有项目达到所需的完成状态。
+
  
 ![Rolling Poller Window](images/rolling-poller-window.png?raw=true)
 
-#### Consequences
-The system emits requests to the target system in a controlled manner, within constraints of the target system.
-This mechanism also works well with dynamic adding or removing items during the run.
-A system could use the Rolling Poller Window together with the Request Aggregator.
+#### 结果
+该系统以受目标系统约束的方式向目标系统发出请求。在运行时需要动态添加或移除项目时，这种机制特别有效。它可以与请求聚合器一起使用，以优化系统性能。
 
-### 4. Sparse Task
-_Break a long-run task into multiple transient tasks for scalability._
+### 4. 稀疏任务
+_将长时间运行的任务分解为多个短暂任务，以实现可伸缩性。_
 
-#### Problem
-The distributed task, provided by a [task scheduler](https://en.wikipedia.org/wiki/Job_scheduler), is commonly used in management systems for reliability, scalability, and decoupling responsibilities, in [Shared-nothing Architecture](https://en.wikipedia.org/wiki/Shared-nothing_architecture).
-The application submits tasks to a task scheduler, which runs tasks in the background in a reliable and distributed manner.
-A conventional and intuitive implementation of a long-run task has the following sequence typically:
+#### 问题
+分布式任务，由[任务调度程序](https://en.wikipedia.org/wiki/Job_scheduler)提供，通常用于管理系统，以实现可靠性、可伸缩性和责任解耦，特别是在[无共享架构](https://en.wikipedia.org/wiki/Shared-nothing_architecture)中。应用程序将任务提交给任务调度程序，它会可靠地在后台以分布式方式进行处理。通常，长时间运行任务的传统和直观实现遵循以下顺序：
 
-1. Perform some operations
-2. Wait for certain completion, which usually involves repeated polling from a target service.
-3. Complete the task as successful, canceled, or error.
-
-While such a long-run style is good because of intuitive in many cases, it has the following drawbacks:
-1. Each long-run task occupies an execution capacity from the scheduler, usually a thread. Thus, the capacity of the scheduler limits the task concurrency, and even the tasks are just waiting. As a result, the system throughput is limited.
-2. The polling model incurs additional I/O.
-3. It's hard to aggregate inter-system I/O as batches for optimization since distributed tasks could run on different nodes in a cluster.
+1. 执行某些操作。
+2. 等待某种特定完成，通常涉及从目标服务中进行重复轮询。
+3. 根据情况完成任务为成功、已取消或错误。
 
 ![Conventional Long-run Task](images/sparse-task-conventional-long-run-task.png?raw=true)
 
-#### Solution
-A sparse task breaks a long-run task into multiple small and independent pieces. It changes the overall structure from a polling model to an event-driven model. Sparse Task pattern consists of the following components:
-1. **Submitter**: Performs the actual task operation and schedules a _timeout monitor task_ on _task scheduler_, per task.
-2. **Timeout monitor task**: A scheduled task that notifies the _event handler_ the operation is timed out.
-3. **Event handler**: Handler to task completion events.
+虽然在许多情况下，这种长时间运行的风格是直观的，但它具有以下缺点：
 
-The Submitter may or may not be a distributed task, depends on the actual implementation.
-The monitor task is usually a distributed task for reliability, e.g., the task should survive service restart. One of the principles for a reliable task system is to never hold states in process/thread. States from the persistence layer are the only source of truth.
+1. 每个长时间运行任务都会占用调度程序的工作容量，通常是一个线程，即使是等待任务，也会限制任务并发性，从而限制系统吞吐量。
+2. 轮询模型会产生额外的I/O。
+3. 将系统间I/O聚合为批处理以进行优化是具有挑战性的，因为分布式任务可能在集群中的不同节点上运行。
+
+
+#### 解决方案
+稀疏任务模式将长时间运行的任务转化为多个小的、独立的部分，将整体结构从轮询模型改为事件驱动模型。该模式包括以下组件：
+
+- **提交者**：执行实际任务操作并为每个任务在任务调度程序上安排一个**超时监视任务**。根据具体实现，提交者可以是分布式任务，也可以不是。
+- **超时监视任务**：一个定时任务，如果操作超时，将通知事件处理程序。通常，监视任务是为了可靠性而设计的分布式任务，可以确保任务在服务重新启动时能够生存。可靠任务系统的原则之一是不要在进程/线程中保存状态，持久层中的状态是唯一的真相来源。
+- **事件处理程序**：管理任务完成事件。超时监视任务在完成后被关闭。
 
 ![Sparse Task Pattern](images/sparse-task-pattern-sequence.png?raw=true)
 
-This pattern relies on a callback to notify the event handler about task completion. Examples are message bus events, Webhook, etc. If the messaging infrastructure does not exist, a polling mechanism can achieve the callback:
+这种模式依赖于回调来通知事件处理程序有关任务完成的信息。这些回调的示例包括消息总线事件、Webhook等。如果没有消息传递基础架构，可以使用轮询机制来实现回调：
 
 ![Notification by Batch Poller](images/notification-by-batch-polling.png)
 
 
-#### Consequences
+稀疏任务模式依赖于分布式调度程序来监视任务超时。一个超时任务与一个逻辑长时间运行的任务相关联。该模型单独处理每个任务。
 
-1. Scalability increases. The blocking logic per long-run task does not occupy the task scheduler capacity. Therefore, more tasks than the number of scheduler worker capacity can logically run in parallel.
-2. Task implementation is simplified. For long-run tasks, in a high-available environment, the whole task logic should be idempotent. For sparse tasks, each tiny piece needs to be idempotent, which is usually easier.
-3. System I/O is reduced by moving from polling pattern to event-driven pattern.
-4. Task tracking of sparse tasks is more complex and may require additional consideration to track the logical task.
-5. System dependency increase. Typically polling is more straightforward, and callback or messaging requires additional infrastructure.
+#### 结果
+1. 可扩展性提高，因为每个长时间运行任务的阻塞逻辑不再占用任务调度程序的容量。因此，逻辑上可以并发运行的任务多于任务调度程序的工作容量。
+2. 任务实现更简单。在高可用环境中，整个任务逻辑应该具有幂等性，而对于稀疏任务，每个小部分通常更容易具有幂等性。
+通过从轮询模式切换到事件驱动模式，减少了系统I/O。
+3. 系统依赖性增加。通常来说，轮询更简单，而回调或消息传递需要额外的基础架构。
+4. 需要一种机制来从事件回调上下文中识别监视任务，以便在成功的回调时关闭任务。通常由支持框架或用户处理。
+5. 跟踪任务需要额外的考虑，因为一个逻辑任务现在由两个物理任务组成。
 
-The Sparse Task pattern depends on scheduling from distributed task scheduler to monitor task timeout. One timeout task is associated with one logical long-run task. This model handles each task individually. An alternative is to manage a large number of items in batches. The following Ledger pattern covers that.
 
-### 5. Ledger
-WIP
+### 5. 标记者和擦除着者
+_分离标记事件和处理事件，以解耦高速和低速系统。_
+
+#### 问题
+
+在某些系统中，会发生触发器或事件，通常需要在触发器上执行特定操作或处理，通常针对特定对象。例如，具有"需要清理1号房间"指示的清理事件的事件驱动系统。一个直接的方法是在事件发生时立即执行操作，由于其简单性，在许多情况下都是合适的。但在更复杂的情况下会出现挑战，比如：
+
+1. 事件的速度高峰超过了处理部分的处理能力。
+2. 目标的处理需要是独特的，对每个事件做出反应会导致不必要的重复操作。
+3. 事件级联：处理可能触发另一个事件，导致另一个操作，使系统在不断增长时变得复杂且难以控制。
+
+
+#### 解决方案
+
+标记和扫描器模式将负责请求更改的系统组件与处理这些更改的部分分开。它包括三个关键元素：
+
+1. **标记器**：在请求时在标志集中标记相关目标。
+2. **标志集**：维护要处理的目标记录的状态。
+3. **扫描器**：消耗标志集并相应地处理目标。
+
+
+![Marker and Sweeper](images/marker-and-sweeper.png)
+
+标记和扫描器模式类似于生产者和消费者模式。
+
+#### 结果
+1. 解耦了请求部分和处理部分，允许它们以自己的速度工作并可以分别扩展。
+2. 请求部分（标记器）由于标志集的轻量特性，可以高吞吐量地运行。
+3. 标志集的基于集合的方法使其成为去重的理想选择。
+4. 处理部分（扫描器）有机会以批处理的方式处理项目。
+
+
+#### 例子
+标记和扫描器模式的典型示例包括网络套接字 _select_ API和Linux _epoll_，等等。
+
+
+## 后记
+模式抽象源自实际经验，反过来又在实践中找到了应用。这个迭代过程经常促使我重新思考我们如何创建软件。并没有一个普遍优越的模式适用于每个问题，但对于每个特定的背景，应该有一个合适的模式。指导我们设计和模式的是支持它们的原则，这些原则是我们从各种真实世界的实践中提炼出来的。正是这些原则我们应该坚守。也许，将来的某一天，当我们回顾我们的工程生涯时，唯一长存的东西将是[中庸之道](https://en.wikipedia.org/wiki/Doctrine_of_the_Mean)。

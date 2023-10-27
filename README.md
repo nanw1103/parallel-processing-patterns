@@ -45,7 +45,8 @@ While these patterns may not be as ubiquitous as the well-known Gang of Four (Go
 
 _It's worth noting that these patterns have been distilled from real-world development experiences and were coined early in the process. It's entirely possible that others have identified similar patterns under different names. If you come across an existing reference, we encourage you to contribute by creating an issue or pull request in this repository._
 
-Source: [https://github.com/nanw1103/parallel-processing-patterns/blob/main/README.md](https://github.com/nanw1103/parallel-processing-patterns/blob/main/README.md)
+_[Source](https://github.com/nanw1103/parallel-processing-patterns/blob/main/README.md)_
+
 
 ## Consideration of Parallelism and Synchronization
 
