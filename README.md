@@ -126,9 +126,9 @@ Threading works well because operating systems support it directly. It lets us w
 
 Yes—some languages were designed from the ground up for asynchronous programming. JavaScript is a good example. In JavaScript, almost everything runs asynchronously by default. The language and its runtime take care of the lower-level details, like I/O and waiting for events, so programmers don’t have to manage that complexity themselves. This makes it easy to write asynchronous code that’s clean and expressive.
 
-Languages like C++, Java, and Python were built to handle sequential tasks well. In contrast, JavaScript and its relatives (like TypeScript and CoffeeScript) are naturally better at describing tasks that run in parallel or respond to events.
+Languages like C/C++, Java, C#, and Python were built to handle sequential tasks well. In contrast, JavaScript is naturally good at describing tasks that run in parallel or respond to events.
 
-Interestingly, no single style has completely taken over. Instead, sequential-style languages have added tools to better support asynchronous tasks—like Futures in Java and C#, or async/await and Rx in C#. JavaScript, even though it’s asynchronous by design, later added await to make writing sequential logic easier.
+Interestingly, no single style has completely taken over. Instead, sequential-style languages have added tools to better support asynchronous tasks, like _Future/Rx/Reactive framework_ in Java, or _async/await_ in Python and C#. JavaScript, even though it’s asynchronous by nature, later added _await_ to make writing sequential logic easier.
 
 There are also other models that help simplify parallel programming. For example:
 
