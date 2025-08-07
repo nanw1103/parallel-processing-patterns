@@ -365,7 +365,7 @@ This pattern has three parts:
 
 1. **Marker**: When an event happens, it quickly marks the item (e.g., “Room 1 needs cleanup”) and adds it to a flag set. No processing is done yet.
 
-2. **Flag Set**: This is a lightweight data structure (like a set or queue) that keeps track of which items need processing. It avoids duplication—if Room 1 is already flagged, it won’t be flagged again.
+2. **Flag Set**: This is a lightweight data structure (e.g. a set) that keeps track of which items need processing. It avoids duplication: if Room 1 is already flagged, it won’t be flagged again.
 
 3. **Sweeper**: A separate process that runs at its own pace, picks up items from the flag set, and does the actual work—such as cleaning up Room 1.
 
